@@ -11,6 +11,11 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import SignupScreen from './src/screens/SignupScreen';
+
+export default function App() {
+  return <SignupScreen />;
+}
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
