@@ -17,7 +17,7 @@ export default function App() {
   return <SignupScreen />;
 }
 
-function App() {
+/*function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
@@ -26,7 +26,7 @@ function App() {
       <AppContent />
     </SafeAreaProvider>
   );
-}
+}*/
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -47,4 +47,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+//export default App;
