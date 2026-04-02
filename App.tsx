@@ -27,7 +27,7 @@ export default function App() {
     </SafeAreaProvider>
   );
 }*/
-
+//푸쉬푸쉬
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
 
