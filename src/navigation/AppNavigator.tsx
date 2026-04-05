@@ -11,6 +11,7 @@ import RecommendScreen from '../screens/RecommendScreen';
 import SearchScreen from '../screens/SearchScreen';
 import FolderScreen from '../screens/FolderScreen';
 import SettingScreen from '../screens/SettingScreen';
+import InterestScreen from '../screens/InterestScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,11 +36,7 @@ const MainTabNavigator = () => {
       {/* [중요] 각 탭마다 component가 다른 파일로 연결되어 있어야 합니다! */}
       <Tab.Screen name="북마크 추천" component={RecommendScreen} />
       <Tab.Screen name="검색" component={SearchScreen} />
-      <Tab.Screen 
-        name="홈" 
-        component={HomeScreen} 
-       
-      />
+      <Tab.Screen name="홈" component={HomeScreen} />
       <Tab.Screen name="폴더" component={FolderScreen} />
       <Tab.Screen name="설정" component={SettingScreen} />
     </Tab.Navigator>
@@ -48,10 +45,14 @@ const MainTabNavigator = () => {
 
 const AppNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Onboarding" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      initialRouteName="Onboarding"
+      screenOptions={{ headerShown: false }}
+    >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen name="InterestSelect" component={InterestScreen} />
       <Stack.Screen name="MainHome" component={MainTabNavigator} />
     </Stack.Navigator>
   );

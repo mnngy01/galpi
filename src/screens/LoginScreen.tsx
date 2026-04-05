@@ -1,3 +1,4 @@
+// screens/LoginScreen.tsx
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -9,6 +10,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -16,25 +18,43 @@ const LoginScreen = ({ navigation }: any) => {
   const [loginId, setLoginId] = useState('');
   const [loginPw, setLoginPw] = useState('');
 
-  const handleLogin = () => {
-    console.log('로그인 시도:', { loginId, loginPw });
-    console.log('로그인 성공!');
-  navigation.replace('MainHome'); // 뒤로가기 방지를 위해 replace 사용
-    // TODO: 서버 연동 및 로그인 로직
-    // 성공 시 홈 화면으로 이동 예시:
-    // navigation.navigate('Home');
+  const handleLogin = async () => {
+    if (!loginId || !loginPw) {
+      Alert.alert('입력 오류', 'ID와 PW를 입력해 주세요.');
+      return;
+    }
+
+    try {
+      console.log('로그인 시도:', { loginId, loginPw });
+
+      // TODO: 실제 파이썬 백엔드 API로 교체
+      // const response = await fetch('http://your-api/auth/login', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ id: loginId, password: loginPw }),
+      // });
+      // const result = await response.json();
+
+      const result = await fakeLogin(loginId, loginPw); // 임시
+
+      if (result.isFirstLogin) {
+        navigation.replace('InterestSelect'); // 첫 로그인 → 관심사 선택
+      } else {
+        navigation.replace('MainHome'); // 기존 유저 → 메인
+      }
+    } catch (err) {
+      Alert.alert('로그인 실패', 'ID 또는 PW를 확인해 주세요.');
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* 키보드가 올라올 때 화면을 가리지 않도록 설정 */}
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
-            
             {/* 상단 타이틀 */}
             <View style={styles.headerContainer}>
               <Text style={styles.headerTitle}>GALPI</Text>
@@ -60,19 +80,29 @@ const LoginScreen = ({ navigation }: any) => {
               />
             </View>
 
-            {/* 로그인 버튼 영역 */}
+            {/* 로그인 버튼 */}
             <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={handleLogin}
+              >
                 <Text style={styles.loginButtonText}>로그인</Text>
               </TouchableOpacity>
             </View>
-
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
+
+// 임시 로그인 함수 — 파이썬 백엔드 연동 전까지 사용
+// isFirstLogin: true  → 관심사 선택 화면으로
+// isFirstLogin: false → MainHome으로
+async function fakeLogin(id: string, pw: string) {
+  await new Promise<void>(res => setTimeout(() => res(), 300));
+  return { isFirstLogin: true, userId: 'user-123' };
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -82,7 +112,7 @@ const styles = StyleSheet.create({
   inner: {
     flex: 1,
     paddingHorizontal: 40,
-    justifyContent: 'center', // 세로 중앙 정렬
+    justifyContent: 'center',
   },
   headerContainer: {
     alignItems: 'center',
@@ -111,13 +141,13 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     backgroundColor: '#FFD3C0',
-    width: 150, // 이미지처럼 적당한 너비의 타원형
+    width: 150,
     height: 55,
     borderRadius: 27.5,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 2, // 안드로이드 그림자
-    shadowColor: '#000', // iOS 그림자
+    elevation: 2,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
