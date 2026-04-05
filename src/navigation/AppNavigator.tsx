@@ -11,6 +11,8 @@ import RecommendScreen from '../screens/RecommendScreen';
 import SearchScreen from '../screens/SearchScreen';
 import FolderScreen from '../screens/FolderScreen';
 import SettingScreen from '../screens/SettingScreen';
+import InterestScreen from '../screens/InterestScreen';
+import AddUrlScreen from '../screens/AddUrlScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
