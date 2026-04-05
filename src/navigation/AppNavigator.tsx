@@ -11,6 +11,7 @@ import RecommendScreen from '../screens/RecommendScreen';
 import SearchScreen from '../screens/SearchScreen';
 import FolderScreen from '../screens/FolderScreen';
 import SettingScreen from '../screens/SettingScreen';
+import AddUrlScreen from '../screens/AddUrlScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,6 +54,7 @@ const AppNavigator = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       <Stack.Screen name="MainHome" component={MainTabNavigator} />
+      <Stack.Screen name="AddUrl" component={AddUrlScreen} />
     </Stack.Navigator>
   );
 };
