@@ -7,16 +7,16 @@ const HomeScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.logoText}>MARKON</Text>
+        <Text style={styles.logoText}>GALPI</Text>
       </View>
-      
+
       <View style={styles.content}>
         <Text style={styles.emptyText}>아직 아무것도 저장하지 않았어요</Text>
       </View>
 
       {/* 오른쪽 하단 + 버튼 */}
-      <TouchableOpacity 
-        style={styles.fab} 
+      <TouchableOpacity
+        style={styles.fab}
         onPress={() => navigation.navigate('AddUrl')}
       >
         <Text style={styles.fabText}>+</Text>
@@ -27,11 +27,21 @@ const HomeScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  header: { height: 60, justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  logoText: { fontSize: 24, fontWeight: '300', letterSpacing: 2, color: '#000' },
+  header: {
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: '300',
+    letterSpacing: 2,
+    color: '#000',
+  },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   emptyText: { fontSize: 18, color: '#666' },
-  
+
   // + 버튼 스타일 (Floating Action Button)
   fab: {
     position: 'absolute',

@@ -65,9 +65,11 @@ const InterestSelectScreen = ({ navigation }: any) => {
       {/* 헤더 */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>GALPI</Text>
-        <Text style={styles.headerSubtitle}>관심 분야를 선택해 주세요</Text>
+        <Text style={styles.headerSubtitle}>
+          갈피를 꽂을 카테고리를 선택해 주세요
+        </Text>
         <Text style={styles.headerDesc}>
-          선택한 항목으로 폴더가 자동 생성됩니다
+          선택한 항목은 폴더로 생성될 예정이에요
         </Text>
       </View>
 
