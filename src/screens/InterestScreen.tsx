@@ -1,5 +1,6 @@
 // screens/InterestSelect.tsx
 import React, { useState } from 'react';
+import { useUserStore } from '../store/userStore'; // 수정
 import {
   StyleSheet,
   View,
@@ -11,24 +12,31 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const INTERESTS = [
-  { id: 'frontend', icon: '💻', label: '프론트엔드', folder: 'frontend' },
-  { id: 'backend', icon: '⚙️', label: '백엔드', folder: 'backend' },
-  { id: 'mobile', icon: '📱', label: '모바일 앱', folder: 'mobile' },
-  { id: 'ai', icon: '🤖', label: 'AI / ML', folder: 'ai-ml' },
-  { id: 'database', icon: '🗄️', label: '데이터베이스', folder: 'database' },
-  { id: 'devops', icon: '☁️', label: '클라우드 / DevOps', folder: 'devops' },
-  { id: 'design', icon: '🎨', label: 'UI / UX 디자인', folder: 'design' },
-  { id: 'security', icon: '🔒', label: '보안', folder: 'security' },
-  { id: 'data', icon: '📊', label: '데이터 분석', folder: 'data-analysis' },
-  { id: 'game', icon: '🎮', label: '게임 개발', folder: 'game-dev' },
-  { id: 'blockchain', icon: '🔗', label: '블록체인', folder: 'blockchain' },
-  { id: 'docs', icon: '📝', label: '기술 문서', folder: 'docs' },
+  { id: 'food', icon: '🍜', label: '맛집', folder: 'food' },
+  { id: 'recipe', icon: '🍳', label: '요리', folder: 'recipe' },
+  { id: 'travel', icon: '✈️', label: '여행', folder: 'travel' },
+  { id: 'interior', icon: '🛋️', label: '인테리어', folder: 'interior' },
+  { id: 'beauty', icon: '💄', label: '뷰티', folder: 'beauty' },
+  { id: 'fashion', icon: '👗', label: '패션', folder: 'fashion' },
+  { id: 'health', icon: '🏃', label: '건강', folder: 'health' },
+  { id: 'money', icon: '💰', label: '재테크', folder: 'money' },
+  { id: 'career', icon: '💼', label: '커리어', folder: 'career' },
+  { id: 'housing', icon: '🏠', label: '부동산', folder: 'housing' },
+  { id: 'hobby', icon: '🎸', label: '취미', folder: 'hobby' },
+  { id: 'pet', icon: '🐾', label: '반려동물', folder: 'pet' },
+  { id: 'parenting', icon: '👶', label: '육아', folder: 'parenting' },
+  { id: 'study', icon: '📚', label: '자기계발', folder: 'study' },
+  { id: 'place', icon: '📍', label: '공간', folder: 'place' },
+  { id: 'culture', icon: '🎬', label: '문화', folder: 'culture' },
+  { id: 'shopping', icon: '🛍️', label: '쇼핑', folder: 'shopping' },
+  { id: 'life', icon: '🌿', label: '라이프', folder: 'life' },
 ] as const;
 
 type InterestId = (typeof INTERESTS)[number]['id'];
 
 const InterestSelectScreen = ({ navigation }: any) => {
   const [selected, setSelected] = useState<Set<InterestId>>(new Set());
+  const setSelectedFolders = useUserStore(state => state.setSelectedFolders); // 추가
 
   const toggle = (id: InterestId) => {
     setSelected(prev => {
@@ -38,23 +46,18 @@ const InterestSelectScreen = ({ navigation }: any) => {
     });
   };
 
-  const handleSubmit = async () => {
-    const chosenFolders = INTERESTS.filter(item => selected.has(item.id)).map(
-      item => item.folder,
-    );
+  const handleSubmit = () => {
+    const chosen = INTERESTS.filter(item => selected.has(item.id)); // 추가
+    setSelectedFolders(chosen); // store에 저장, 추가
 
-    try {
-      // TODO: 파이썬 백엔드 연동 시 교체
-      // await fetch('http://your-api/users/interests', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ folders: chosenFolders }),
-      // });
-      console.log('생성할 폴더:', chosenFolders);
-      navigation.replace('MainHome');
-    } catch (err) {
-      Alert.alert('오류', '저장에 실패했습니다. 다시 시도해 주세요.');
-    }
+    // TODO: 파이썬 백엔드 연동 시 교체
+    // await fetch('http://your-api/users/interests', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ folders: chosen }),
+    // });
+
+    navigation.replace('MainHome');
   };
 
   return (
@@ -120,8 +123,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-
-  // 헤더
   headerContainer: {
     alignItems: 'center',
     paddingTop: 32,
@@ -145,8 +146,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#A0A0A0',
   },
-
-  // 그리드
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -183,8 +182,6 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
-
-  // 하단
   footer: {
     alignItems: 'center',
     paddingVertical: 20,
