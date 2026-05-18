@@ -99,7 +99,13 @@ const FolderScreen = ({ navigation }: any) => {
           <Text style={styles.logoText}>GALPI</Text>
 
           {/* 오른쪽: ... 팝업 트리거 버튼 */}
-          <TouchableOpacity style={styles.headerBtn} onPress={openModal}>
+          <TouchableOpacity
+            style={styles.headerBtn}
+            onPress={() => {
+              console.log('+ 버튼 클릭됨!');
+              openModal();
+            }}
+          >
             <Text style={styles.moreIcon}>＋</Text>
           </TouchableOpacity>
         </View>

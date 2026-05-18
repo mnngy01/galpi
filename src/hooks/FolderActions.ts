@@ -20,7 +20,9 @@ export const FolderActions = () => {
 
   // 1. 새로운 폴더(카테고리) 추가 기능
   const openModal = () => {
+    console.log('openModal 호출됨!');
     setFolderNameInput('');
+    console.log('isModalVisible를 true로 설정');
     setIsModalVisible(true);
   };
   const closeModal = () => setIsModalVisible(false);
