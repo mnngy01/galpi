@@ -1,4 +1,3 @@
-// src/screens/FolderScreen.tsx
 import React from 'react';
 import {
   StyleSheet,
@@ -9,32 +8,38 @@ import {
   Image,
   Dimensions,
   ListRenderItem,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DUMMY_CATEGORIES, DUMMY_URLS } from '../data/dummyData';
+import { DUMMY_URLS } from '../data/dummyData';
+import { FolderActions, CategoryItem } from '../hooks/FolderActions';
 
-// HomeScreen 디자인 피드와 2열 그리드 균형을 완벽히 맞추기 위한 너비 계산
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 48) / 2; // (전체 가로폭 - 양옆 및 중앙 여백) / 2
-
-// API 스펙 규칙에 맞춘 카테고리 아이템 인터페이스 정의
-interface CategoryItem {
-  id: number;
-  name: string;
-  higherFolderId: number | null;
-  createdAt: string;
-}
+const CARD_WIDTH = (width - 48) / 2;
 
 const FolderScreen = ({ navigation }: any) => {
-  // FlatList 전용 렌더링 함수 격리 선언 (TypeScript 오버로드 원천 차단)
+  const {
+    folders,
+    isEditMode,
+    setIsEditMode,
+    isModalVisible,
+    openModal,
+    closeModal,
+    folderNameInput,
+    setFolderNameInput,
+    handleAddFolder,
+    handleDeleteFolder,
+  } = FolderActions();
+
   const renderFolderItem: ListRenderItem<CategoryItem> = ({ item }) => {
-    // 1. 해당 카테고리 이름과 일치하는 북마크 링크들 필터링
     const categoryUrls = DUMMY_URLS.filter(url => {
       if (item.name === '즐겨찾기') return url.isFavorite;
       return url.category === item.name;
     });
 
-    // 2. 가장 최근에 저장된 링크 딱 '하나'의 객체에서 썸네일 경로 확보
     const latestBookmark = categoryUrls[categoryUrls.length - 1];
     const latestThumbnail = latestBookmark?.thumbnail;
 
@@ -42,51 +47,133 @@ const FolderScreen = ({ navigation }: any) => {
       <TouchableOpacity
         style={styles.card}
         activeOpacity={0.8}
-        onPress={() =>
-          navigation.navigate('BookmarkList', {
-            folderId: item.id,
-            folderName: item.name,
-          })
-        }
+        onPress={() => {
+          if (!isEditMode) {
+            navigation.navigate('BookmarkList', {
+              folderId: item.id,
+              folderName: item.name,
+            });
+          }
+        }}
       >
         {latestThumbnail ? (
-          // 가장 최근 저장된 링크의 썸네일 이미지가 존재할 때
           <Image source={{ uri: latestThumbnail }} style={styles.thumbnail} />
         ) : (
-          // 카테고리에 글이 없거나 이미지 링크가 null일 때 깔리는 기본 회색 무지 배경
           <View style={[styles.thumbnail, styles.emptyThumbnail]} />
         )}
 
-        {/* 버레이 레이어 */}
         <View style={styles.overlay}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.name}
-          </Text>
+          <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardCount}>{categoryUrls.length}개의 갈피</Text>
         </View>
+
+        {/* 편집 모드일 때 좌측 상단 삭제 버튼 노출 */}
+        {isEditMode && item.name !== '즐겨찾기' && (
+          <TouchableOpacity
+            style={styles.deleteBadge}
+            activeOpacity={0.7}
+            onPress={() => handleDeleteFolder(item.id)}
+          >
+            <Text style={styles.deleteBadgeText}>×</Text>
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      {/* 상단 노치 영역만 안전 마진을 주어 하단 주황색 탭바 밑이 들뜨는 현상 방지 */}
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
+          {/* 왼쪽: 편집/완료 버튼 */}
+          <TouchableOpacity
+            style={styles.headerBtn}
+            onPress={() => setIsEditMode(!isEditMode)}
+          >
+            <Text style={styles.headerBtnText}>
+              {isEditMode ? '완료' : '편집'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* 중앙: 로고 */}
           <Text style={styles.logoText}>GALPI</Text>
+
+          {/* 오른쪽: ... 팝업 트리거 버튼 */}
+          <TouchableOpacity style={styles.headerBtn} onPress={openModal}>
+            <Text style={styles.moreIcon}>＋</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* API 명세 기반의 DUMMY_CATEGORIES를 그대로 화면에 뿌려주는 영역 */}
       <FlatList
-        data={DUMMY_CATEGORIES}
+        data={folders}
         renderItem={renderFolderItem}
-        keyExtractor={item => item.id.toString()} // 숫자형 ID를 문자열 키로 안전하게 변환
+        keyExtractor={item => item.id.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
       />
+
+      {/* 아래에서 올라오는 새 폴더 생성 바텀 팝업 */}
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalContent}
+          >
+            {/* 팝업 헤더 */}
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                onPress={closeModal}
+                style={styles.modalCloseBtn}
+              >
+                <Text style={styles.modalCloseText}>×</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>새 폴더 생성</Text>
+              <TouchableOpacity
+                onPress={handleAddFolder}
+                disabled={!folderNameInput.trim()}
+                style={[
+                  styles.modalCreateBtn,
+                  folderNameInput.trim()
+                    ? styles.modalCreateBtnActive
+                    : styles.modalCreateBtnInactive,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.modalCreateText,
+                    folderNameInput.trim()
+                      ? styles.modalCreateTextActive
+                      : styles.modalCreateTextInactive,
+                  ]}
+                >
+                  생성
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* 입력창 바디 */}
+            <View style={styles.modalBody}>
+              <TextInput
+                style={styles.input}
+                placeholder="공유 앨범 이름"
+                placeholderTextColor="#C7C7CD"
+                value={folderNameInput}
+                onChangeText={setFolderNameInput}
+                autoFocus={true}
+                maxLength={20}
+              />
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -101,8 +188,26 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  headerBtn: {
+    width: 50,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerBtnText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#555',
+  },
+  moreIcon: {
+    fontSize: 22,
+    fontWeight: '400',
+    color: '#000',
   },
   logoText: {
     fontSize: 24,
@@ -113,7 +218,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,
-    paddingBottom: 100, // 하단 탭바 레이어에 가려져서 리스트가 안 잘리도록 패딩
+    paddingBottom: 100,
   },
   row: {
     justifyContent: 'space-between',
@@ -121,10 +226,11 @@ const styles = StyleSheet.create({
   },
   card: {
     width: CARD_WIDTH - 2,
-    height: CARD_WIDTH - 2, // HomeScreen 디자인 그리드와 완벽 매칭 비율
+    height: CARD_WIDTH - 2,
     borderRadius: 18,
     overflow: 'hidden',
     backgroundColor: '#E0E0E0',
+    position: 'relative',
   },
   thumbnail: {
     width: '100%',
@@ -138,13 +244,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 14,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // 30% 불투명도의 검은색 배경
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)', // 밝은 썸네일 위에서도 제목이 선명하게 보이도록 그림자 처리
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
@@ -152,6 +258,103 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#EFEFEF',
     fontWeight: '500',
+  },
+  deleteBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 59, 48, 0.9)',
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  deleteBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: -2,
+  },
+  /* 바텀 팝업 모달 스타일 */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 뒷배경 어둡게
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#F8F8F8',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+  },
+  modalHeader: {
+    height: 60,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
+  },
+  modalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EFEFEF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCloseText: {
+    fontSize: 22,
+    color: '#333',
+    marginTop: -2,
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+  },
+  modalCreateBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalCreateBtnActive: {
+    backgroundColor: '#FFB899', // 입력 시 주황색 활성화
+  },
+  modalCreateBtnInactive: {
+    backgroundColor: '#E5E5EA', // 비활성화 회색
+  },
+  modalCreateText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modalCreateTextActive: {
+    color: '#FFFFFF',
+  },
+  modalCreateTextInactive: {
+    color: '#A1A1A1',
+  },
+  modalBody: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  input: {
+    width: '100%',
+    height: 54,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 27,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    color: '#000',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
 });
 
