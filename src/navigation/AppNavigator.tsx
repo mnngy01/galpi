@@ -10,6 +10,7 @@ import HomeScreen from '../screens/HomeScreen';
 import RecommendScreen from '../screens/RecommendScreen';
 import SearchScreen from '../screens/SearchScreen';
 import FolderScreen from '../screens/FolderScreen';
+import FolderListScreen from '../screens/FolderListScreen';
 import SettingScreen from '../screens/SettingScreen';
 import InterestScreen from '../screens/InterestScreen';
 import AddUrlScreen from '../screens/AddUrlScreen';
@@ -56,6 +57,9 @@ const AppNavigator = () => {
       <Stack.Screen name="InterestSelect" component={InterestScreen} />
       <Stack.Screen name="MainHome" component={MainTabNavigator} />
       <Stack.Screen name="AddUrl" component={AddUrlScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Folder" component={FolderScreen} />
+      <Stack.Screen name="BookmarkList" component={FolderListScreen} />
     </Stack.Navigator>
   );
 };

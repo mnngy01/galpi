@@ -14,17 +14,61 @@ export const DUMMY_MEMBER = {
   createdAt: '2026-03-20 14:00:00',
 };
 
-// 카테고리
 export const DUMMY_CATEGORIES = [
-  { id: 'C0', name: '즐겨찾기' },
-  { id: 'C1', name: '여행' },
-  { id: 'C2', name: '맛집' },
-  { id: 'C3', name: '학업' },
-  { id: 'C4', name: '경제' },
-  { id: 'C5', name: '요리' },
-  { id: 'C6', name: '쇼핑' },
-  { id: 'C7', name: '개발' },
-  { id: 'C8', name: '운동' },
+  {
+    id: 0,
+    name: '즐겨찾기',
+    higherFolderId: null,
+    createdAt: '2026-03-20T14:00:00.000Z',
+  },
+  {
+    id: 1,
+    name: '여행',
+    higherFolderId: null,
+    createdAt: '2026-05-10T14:32:00.000Z',
+  },
+  {
+    id: 2,
+    name: '맛집',
+    higherFolderId: null,
+    createdAt: '2026-05-10T15:10:00.000Z',
+  },
+  {
+    id: 3,
+    name: '학업',
+    higherFolderId: null,
+    createdAt: '2026-05-11T09:00:00.000Z',
+  },
+  {
+    id: 4,
+    name: '경제',
+    higherFolderId: null,
+    createdAt: '2026-05-12T10:22:00.000Z',
+  },
+  {
+    id: 5,
+    name: '요리',
+    higherFolderId: null,
+    createdAt: '2026-05-13T11:15:00.000Z',
+  },
+  {
+    id: 6,
+    name: '쇼핑',
+    higherFolderId: null,
+    createdAt: '2026-05-14T18:45:00.000Z',
+  },
+  {
+    id: 7,
+    name: '개발',
+    higherFolderId: null,
+    createdAt: '2026-05-15T13:12:00.000Z',
+  },
+  {
+    id: 8,
+    name: '운동',
+    higherFolderId: null,
+    createdAt: '2026-05-16T07:30:00.000Z',
+  },
 ];
 
 export const DUMMY_URLS = [
