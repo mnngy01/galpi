@@ -1,115 +1,125 @@
 import React, { useState } from 'react';
 import {
+  Alert,
+  Image,
+  ScrollView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
-  Switch,
-  Alert,
-  ScrollView,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-// 1. 더미 데이터 불러오기
-import { DUMMY_MEMBER } from '../data/dummyData';
+type Member = {
+  id: number;
+  name: string;
+  memberId: string;
+  memberPw: string;
+  birth: string;
+  phone: number;
+  aiRecommendAlert: boolean;
+  aiSummary: boolean;
+  aiSave: boolean;
+  imageUrl: string;
+  createdAt: string;
+};
+// 더미데이터
+const initialMember: Member = {
+  id: 123,
+  name: 'username',
+  memberId: 'sujeongi@sungsin.ac.kr',
+  memberPw: 'password123!',
+  birth: '2000-01-01',
+  phone: 1012345678,
+  aiRecommendAlert: true,
+  aiSummary: true,
+  aiSave: false,
+  imageUrl: '',
+  createdAt: '2024-02-22T07:47:49.803Z',
+};
 
 const SettingScreen = ({ navigation }: any) => {
-  // 2. 더미 데이터를 초기 상태값으로 설정
-  const [member, setMember] = useState(DUMMY_MEMBER);
+  const [member] = useState<Member>(initialMember);
 
-  // 개별 필드 스위치 토글 함수
-  const toggleSwitch = (field: 'aiRecommendAlert' | 'aiSummary' | 'aiSave') => {
-    setMember((prevState) => ({
-      ...prevState,
-      [field]: !prevState[field],
-    }));
-    console.log(`${field} 상태 변경:`, !member[field]);
+  const handleEditProfile = () => {
+    console.log('회원정보 수정 이동:', member.id);
   };
 
-  // 로그아웃 처리
+  const handleAiSetting = () => {
+    console.log('AI기능 설정 이동:', {
+      aiRecommendAlert: member.aiRecommendAlert,
+      aiSummary: member.aiSummary,
+      aiSave: member.aiSave,
+    });
+  };
+
   const handleLogout = () => {
-    Alert.alert("로그아웃", "정말 로그아웃 하시겠습니까?", [
-      { text: "취소", style: "cancel" },
-      { 
-        text: "확인", 
-        onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] }) 
+    Alert.alert('로그아웃', '정말 로그아웃 하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '확인',
+        onPress: () =>
+          navigation.reset({ index: 0, routes: [{ name: 'Onboarding' }] }),
       },
     ]);
   };
 
+  const handleWithdraw = () => {
+    Alert.alert('회원탈퇴', '정말 회원탈퇴 하시겠습니까?', [
+      { text: '취소', style: 'cancel' },
+      { text: '확인', style: 'destructive' },
+    ]);
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* 상단 프로필 영역 */}
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.profileSection}>
-          {/* 프로필 이미지 (imageUrl 활용 가능) */}
-          <View style={styles.profileImagePlaceholder} />
-          
-          <View style={styles.profileTextContainer}>
-            <View style={styles.usernameRow}>
-              {/* member.name 활용 */}
-              <Text style={styles.usernameText}>{member.name}</Text>
-              <TouchableOpacity onPress={() => console.log('프로필 수정 페이지로 이동')}>
-                <Text style={styles.editProfileLink}>프로필 수정 &gt;</Text>
-              </TouchableOpacity>
-            </View>
-            {/* member.loginId 활용 */}
-            <Text style={styles.emailText}>{member.loginId}</Text>
+          {member.imageUrl ? (
+            <Image
+              source={{ uri: member.imageUrl }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <View style={styles.profileImagePlaceholder} />
+          )}
+
+          <View style={styles.profileInfo}>
+            <Text style={styles.userName}>{member.name}</Text>
+            <Text style={styles.memberId}>{member.memberId}</Text>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={handleEditProfile}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.editButtonText}>회원정보 수정 &gt;</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {/* 메뉴 리스트 */}
-        <View style={styles.menuList}>
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => console.log('회원정보 수정 이동')}
-          >
-            <Text style={styles.menuItemText}>회원정보수정</Text>
+        <View style={styles.divider} />
+
+        <View style={styles.settingSection}>
+          <Text style={styles.sectionLabel}>설정</Text>
+          <TouchableOpacity onPress={handleAiSetting} activeOpacity={0.7}>
+            <Text style={styles.settingTitle}>AI기능 설정</Text>
           </TouchableOpacity>
-
-          {/* AI 설정 섹션 - 스위치들 */}
-          <View style={styles.switchGroup}>
-            {/* AI 추천알림 (aiRecommendAlert) */}
-            <View style={styles.switchItem}>
-              <Text style={styles.switchLabel}>AI추천알림</Text>
-              <Switch
-                value={member.aiRecommendAlert}
-                onValueChange={() => toggleSwitch('aiRecommendAlert')}
-                trackColor={{ false: "#D1D1D1", true: "#FFB899" }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            {/* AI 요약 (aiSummary) */}
-            <View style={styles.switchItem}>
-              <Text style={styles.switchLabel}>AI요약</Text>
-              <Switch
-                value={member.aiSummary}
-                onValueChange={() => toggleSwitch('aiSummary')}
-                trackColor={{ false: "#D1D1D1", true: "#FFB899" }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            {/* AI 자동저장 (aiSave) */}
-            <View style={styles.switchItem}>
-              <Text style={styles.switchLabel}>AI자동저장</Text>
-              <Switch
-                value={member.aiSave}
-                onValueChange={() => toggleSwitch('aiSave')}
-                trackColor={{ false: "#D1D1D1", true: "#FFB899" }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-          </View>
         </View>
 
-        {/* 로그아웃 버튼 */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>로그아웃</Text>
-        </TouchableOpacity>
+        <View style={styles.divider} />
 
+        <View style={styles.accountSection}>
+          <TouchableOpacity onPress={handleLogout} activeOpacity={0.7}>
+            <Text style={styles.accountAction}>로그아웃</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleWithdraw} activeOpacity={0.7}>
+            <Text style={styles.accountAction}>회원탈퇴</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -120,81 +130,89 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  scrollContent: {
-    paddingHorizontal: 40,
-    paddingBottom: 40,
-  },
-  // 프로필 스타일
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 50,
-    marginBottom: 60,
-  },
-  profileImagePlaceholder: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-    backgroundColor: '#E0E0E0',
-    marginRight: 25,
-  },
-  profileTextContainer: {
+  scroll: {
     flex: 1,
   },
-  usernameRow: {
+  scrollContent: {
+    paddingBottom: 56,
+  },
+  profileSection: {
+    minHeight: 160,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingHorizontal: 32,
+    paddingTop: 12,
   },
-  usernameText: {
-    fontSize: 26,
-    fontWeight: '500',
-    color: '#000',
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 60,
+    backgroundColor: '#D9D9D9',
   },
-  editProfileLink: {
+  profileImagePlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 60,
+    backgroundColor: '#D9D9D9',
+  },
+  profileInfo: {
+    flex: 1,
+    marginLeft: 24,
+  },
+  userName: {
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+    color: '#000000',
+  },
+  memberId: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
     fontSize: 14,
-    color: '#BDBDBD',
+    lineHeight: 20,
+    color: '#8A8A8A',
+    //textDecorationLine: 'underline',
   },
-  emailText: {
+  editButton: {
+    alignSelf: 'flex-start',
+    marginTop: 13,
+  },
+  editButtonText: {
     fontSize: 14,
-    color: '#BDBDBD',
+    lineHeight: 20,
+    color: '#7D7D7D',
   },
-  // 메뉴 리스트 스타일
-  menuList: {
-    gap: 45,
+  divider: {
+    height: 12,
+    backgroundColor: '#F1F1F1',
   },
-  menuItem: {
-    paddingVertical: 5,
+  settingSection: {
+    height: 145,
+    paddingHorizontal: 38,
+    paddingTop: 34,
   },
-  menuItemText: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: '#000',
-  },
-  // 스위치 그룹 스타일
-  switchGroup: {
-    gap: 35,
-  },
-  switchItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  switchLabel: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: '#000',
-  },
-  // 로그아웃 버튼 스타일
-  logoutButton: {
-    marginTop: 120,
-    alignSelf: 'center',
-  },
-  logoutButtonText: {
+  sectionLabel: {
     fontSize: 18,
-    color: '#9E9E9E',
-    fontWeight: '400',
+    lineHeight: 24,
+    color: '#555555',
+  },
+  settingTitle: {
+    marginTop: 24,
+    fontSize: 20,
+    lineHeight: 32,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  accountSection: {
+    paddingHorizontal: 38,
+    paddingTop: 42,
+    gap: 30,
+  },
+  accountAction: {
+    fontSize: 20,
+    lineHeight: 32,
+    fontWeight: '600',
+    color: '#000000',
   },
 });
 

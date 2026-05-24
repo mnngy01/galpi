@@ -1,17 +1,17 @@
 // src/data/dummyData.ts
 
 export const DUMMY_MEMBER = {
-  memberId: 'M001',
-  name: '성신이',
-  loginId: 'sujeongi@sungsin.ac.kr',
-  loginPw: 'password123!',
+  id: 123,
+  name: 'username',
+  memberId: 'sujeongi@sungsin.ac.kr',
+  memberPw: 'password123!',
   birth: '2000-01-01',
-  phone: '01012345678',
-  aiRecommendAlert: false,
+  phone: 1012345678,
+  aiRecommendAlert: true,
   aiSummary: true,
   aiSave: false,
-  imageUrl: 'https://via.placeholder.com/150',
-  createdAt: '2026-03-20 14:00:00',
+  imageUrl: '',
+  createdAt: '2024-02-22T07:47:49.803Z',
 };
 
 export const DUMMY_CATEGORIES = [
