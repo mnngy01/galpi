@@ -1,31 +1,36 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const OnboardingScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       {/* 중앙 로고 영역 */}
       <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>GALPI</Text>
+        <Image
+          source={require('../assets/logo_pink_2.png')}
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
       </View>
 
       {/* 하단 버튼 영역 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          style={[styles.mainButton, { backgroundColor: '#FFD3C0' }]} 
+        <TouchableOpacity
+          style={[styles.mainButton, { backgroundColor: '#FFD3C0' }]}
           onPress={() => navigation.navigate('Login')}
         >
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.mainButton, { backgroundColor: '#FFD3C0' }]} 
+        <TouchableOpacity
+          style={[styles.mainButton, { backgroundColor: '#FFD3C0' }]}
           onPress={() => navigation.navigate('Signup')}
         >
           <Text style={styles.buttonText}>회원가입</Text>
         </TouchableOpacity>
 
-        {/* 소셜 로그인 영역 */}
+        {/* 소셜 로그인 영역
         <View style={styles.socialContainer}>
           <TouchableOpacity style={styles.socialCircle}>
             <Text style={styles.socialText}>카카오</Text>
@@ -36,7 +41,7 @@ const OnboardingScreen = ({ navigation }: any) => {
           <TouchableOpacity style={styles.socialCircle}>
             <Text style={styles.socialText}>애플</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
     </SafeAreaView>
   );
@@ -52,6 +57,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  logoImage: {
+    width: 200,
+    height: 200,
+  },
   logoText: {
     fontSize: 48,
     fontWeight: '300',
@@ -64,9 +73,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainButton: {
-    width: '100%',
-    height: 56,
-    borderRadius: 28,
+    width: '80%',
+    height: 55,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
@@ -76,23 +85,23 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '500',
   },
-  socialContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
-    gap: 20,
-  },
-  socialCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#E0E0E0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  socialText: {
-    fontSize: 10,
-    color: '#333',
-  },
+  // socialContainer: {
+  //   flexDirection: 'row',
+  //   marginTop: 20,
+  //   gap: 20,
+  // },
+  // socialCircle: {
+  //   width: 50,
+  //   height: 50,
+  //   borderRadius: 25,
+  //   backgroundColor: '#E0E0E0',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
+  // socialText: {
+  //   fontSize: 10,
+  //   color: '#333',
+  // },
 });
 
 export default OnboardingScreen;

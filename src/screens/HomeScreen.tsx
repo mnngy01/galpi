@@ -44,9 +44,9 @@ const HomeScreen = ({ navigation }: any) => {
   };
 
   return (
-    // 💡 최상단을 SafeAreaView 대신 일반 View로 교체하여 화면 전체(맨 바닥까지)를 사용하네!
+    // 최상단을 SafeAreaView 대신 일반 View로 교체하여 화면 전체(맨 바닥까지)를 사용하네!
     <View style={styles.container}>
-      {/* 💡 상단 로고 헤더 영역만 노치에 가려지지 않게 SafeAreaView로 감싸주었네. */}
+      {/* 상단 로고 헤더 영역만 노치에 가려지지 않게 SafeAreaView로 감싸주었네. */}
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
           <Text style={styles.logoText}>GALPI</Text>

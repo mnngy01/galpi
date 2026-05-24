@@ -27,15 +27,9 @@ const LoginScreen = ({ navigation }: any) => {
     try {
       console.log('로그인 시도:', { loginId, loginPw });
 
-      // TODO: 실제 파이썬 백엔드 API로 교체
-      // const response = await fetch('http://your-api/auth/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ id: loginId, password: loginPw }),
-      // });
-      // const result = await response.json();
+      // 백엔드 부분
 
-      const result = await fakeLogin(loginId, loginPw); // 임시
+      const result = await fakeLogin(loginId, loginPw); // 프론트용 임시 로그인 함수
 
       if (result.isFirstLogin) {
         navigation.replace('InterestSelect'); // 첫 로그인 → 관심사 선택

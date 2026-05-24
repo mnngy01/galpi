@@ -1,4 +1,5 @@
 // src/screens/BookmarkListScreen.tsx
+// 폴더 클릭하면 나오는 화면
 import React from 'react';
 import {
   StyleSheet,
