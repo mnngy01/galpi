@@ -24,7 +24,7 @@ type InterestId = (typeof INTERESTS)[number]['id'];
 
 const InterestScreen = ({ navigation }: any) => {
   const [selected, setSelected] = useState<Set<InterestId>>(new Set());
-  const setSelectedFolders = useUserStore(state => state.setSelectedFolders);
+  const setSelectedFolders = useUserStore((state: any) => state.setSelectedFolders);
   void setSelectedFolders;
 
   const toggle = (id: InterestId) => {
