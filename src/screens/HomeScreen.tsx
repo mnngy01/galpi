@@ -37,10 +37,10 @@ const HomeScreen = ({ navigation }: any) => {
         {/* 이미지 혹은 회색 배경 위에 얹어지는 반투명 필터 레이어 */}
         <View style={styles.overlay}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.title}
+            {item.url}
           </Text>
           <Text style={styles.cardSummary} numberOfLines={3}>
-            {item.summary}
+            {item.aiSummary}
           </Text>
         </View>
       </TouchableOpacity>
@@ -62,9 +62,9 @@ const HomeScreen = ({ navigation }: any) => {
         <Text style={styles.sectionTitle}>최근 저장한 북마크</Text>
 
         <FlatList
-          data={DUMMY_URLS}
+          data={BOOKMARK_DATA}
           renderItem={renderBookmarkItem}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.bookmarkId.toString()}
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}

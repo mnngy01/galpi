@@ -14,7 +14,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DUMMY_URLS } from '../data/dummyData';
+import { BOOKMARK_DATA, DUMMY_CATEGORIES } from '../data/dummyData';
 import { FolderActions, CategoryItem } from '../hooks/FolderActions';
 
 const { width } = Dimensions.get('window');
@@ -35,13 +35,14 @@ const FolderScreen = ({ navigation }: any) => {
   } = FolderActions();
 
   const renderFolderItem: ListRenderItem<CategoryItem> = ({ item }) => {
-    const categoryUrls = DUMMY_URLS.filter(url => {
-      if (item.name === '즐겨찾기') return url.isFavorite;
-      return url.category === item.name;
+    const categoryBookmarks = BOOKMARK_DATA.filter(bookmark => {
+      if (item.name === '즐겨찾기') return bookmark.like;
+      const folder = DUMMY_CATEGORIES.find(c => c.name === item.name);
+      return folder && bookmark.folderId === folder.folderId;
     });
 
-    const latestBookmark = categoryUrls[categoryUrls.length - 1];
-    const latestThumbnail = latestBookmark?.thumbnail;
+    const latestBookmark = categoryBookmarks[categoryBookmarks.length - 1];
+    const latestThumbnail = latestBookmark?.imageUrl;
 
     return (
       <TouchableOpacity
@@ -64,10 +65,9 @@ const FolderScreen = ({ navigation }: any) => {
 
         <View style={styles.overlay}>
           <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardCount}>{categoryUrls.length}개의 갈피</Text>
+          <Text style={styles.cardCount}>{categoryBookmarks.length}개의 갈피</Text>
         </View>
 
-        {/* 편집 모드일 때 좌측 상단 삭제 버튼 노출 */}
         {isEditMode && item.name !== '즐겨찾기' && (
           <TouchableOpacity
             style={styles.deleteBadge}
@@ -85,7 +85,6 @@ const FolderScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
-          {/* 왼쪽: 편집/완료 버튼 */}
           <TouchableOpacity
             style={styles.headerBtn}
             onPress={() => setIsEditMode(!isEditMode)}
@@ -95,10 +94,8 @@ const FolderScreen = ({ navigation }: any) => {
             </Text>
           </TouchableOpacity>
 
-          {/* 중앙: 로고 */}
           <Text style={styles.logoText}>GALPI</Text>
 
-          {/* 오른쪽: ... 팝업 트리거 버튼 */}
           <TouchableOpacity
             style={styles.headerBtn}
             onPress={() => {
@@ -121,7 +118,6 @@ const FolderScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.listContainer}
       />
 
-      {/* 아래에서 올라오는 새 폴더 생성 바텀 팝업 */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -133,7 +129,6 @@ const FolderScreen = ({ navigation }: any) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.modalContent}
           >
-            {/* 팝업 헤더 */}
             <View style={styles.modalHeader}>
               <TouchableOpacity
                 onPress={closeModal}
@@ -165,7 +160,6 @@ const FolderScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             </View>
 
-            {/* 입력창 바디 */}
             <View style={styles.modalBody}>
               <TextInput
                 style={styles.input}
@@ -282,10 +276,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: -2,
   },
-  /* 바텀 팝업 모달 스타일 */
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // 뒷배경 어둡게
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'flex-end',
   },
   modalContent: {
@@ -329,10 +322,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalCreateBtnActive: {
-    backgroundColor: '#FFB899', // 입력 시 주황색 활성화
+    backgroundColor: '#FFB899',
   },
   modalCreateBtnInactive: {
-    backgroundColor: '#E5E5EA', // 비활성화 회색
+    backgroundColor: '#E5E5EA',
   },
   modalCreateText: {
     fontSize: 14,

@@ -17,14 +17,13 @@ import { BOOKMARK_DATA } from '../data/dummyData';
 
 // 북마크 아이템의 타입 인터페이스 정의
 interface BookmarkItem {
-  id: string;
+  bookmarkId: number;
   url: string;
-  title: string;
-  thumbnail: string | null;
-  summary: string;
-  category: string;
-  isFavorite: boolean;
-  createdAt: string;
+  folderId: number;
+  imageUrl: string | null;
+  aiSummary: string;
+  like: boolean;
+  createdAt: Date;
 }
 
 const SearchScreen = () => {
@@ -43,8 +42,8 @@ const SearchScreen = () => {
     // 제목(title) 또는 내용(summary)에 검색어가 포함되었는지 필터링
     const filtered = (BOOKMARK_DATA as BookmarkItem[]).filter(
       item =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.summary.toLowerCase().includes(query.toLowerCase()),
+        item.url.toLowerCase().includes(query.toLowerCase()) ||
+        item.aiSummary.toLowerCase().includes(query.toLowerCase()),
     );
     setFilteredResults(filtered);
   };
@@ -63,8 +62,8 @@ const SearchScreen = () => {
           }
         }}
       >
-        {item.thumbnail ? (
-          <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
         ) : (
           <View style={[styles.thumbnail, styles.emptyThumbnail]} />
         )}
@@ -72,10 +71,10 @@ const SearchScreen = () => {
         {/* 30% 불투명도의 검은색 배경 오버레이 레이어 */}
         <View style={styles.overlay}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.title}
+            {item.url}
           </Text>
           <Text style={styles.cardSummary} numberOfLines={2}>
-            {item.summary}
+            {item.aiSummary}
           </Text>
         </View>
       </TouchableOpacity>
@@ -100,7 +99,7 @@ const SearchScreen = () => {
       <FlatList
         data={filteredResults}
         renderItem={renderCardItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item.bookmarkId.toString()}
         numColumns={1} // 👈 1열 구조로 명확히 고정!
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
