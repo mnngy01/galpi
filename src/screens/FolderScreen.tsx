@@ -51,7 +51,7 @@ const FolderScreen = ({ navigation }: any) => {
         onPress={() => {
           if (!isEditMode) {
             navigation.navigate('BookmarkList', {
-              folderId: item.id,
+              folderId: item.folderId,
               folderName: item.name,
             });
           }
@@ -72,7 +72,7 @@ const FolderScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.deleteBadge}
             activeOpacity={0.7}
-            onPress={() => handleDeleteFolder(item.id)}
+            onPress={() => handleDeleteFolder(item.folderId)}
           >
             <Text style={styles.deleteBadgeText}>×</Text>
           </TouchableOpacity>
@@ -111,7 +111,7 @@ const FolderScreen = ({ navigation }: any) => {
       <FlatList
         data={folders}
         renderItem={renderFolderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.folderId.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
