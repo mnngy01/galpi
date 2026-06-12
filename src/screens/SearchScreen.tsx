@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 // 상단 외부 데이터 파일에서 DUMMY_URLS 명확히 import 완료
-import { DUMMY_URLS } from '../data/dummyData';
+import { BOOKMARK_DATA } from '../data/dummyData';
 
 // 북마크 아이템의 타입 인터페이스 정의
 interface BookmarkItem {
@@ -41,7 +41,7 @@ const SearchScreen = () => {
     }
 
     // 제목(title) 또는 내용(summary)에 검색어가 포함되었는지 필터링
-    const filtered = (DUMMY_URLS as BookmarkItem[]).filter(
+    const filtered = (BOOKMARK_DATA as BookmarkItem[]).filter(
       item =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         item.summary.toLowerCase().includes(query.toLowerCase()),

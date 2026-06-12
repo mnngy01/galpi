@@ -11,51 +11,49 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DUMMY_URLS } from '../data/dummyData';
+import { BOOKMARK_DATA } from '../data/dummyData';
 
 // HomeScreen과 동일한 카드 너비 계산
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
 
 interface BookmarkItem {
-  id: string;
+  bookmarkId: number;
   url: string;
-  title: string;
-  thumbnail: string | null;
-  summary: string;
-  category: string;
-  isFavorite: boolean;
-  createdAt: string;
+  folderId: number;
+  imageUrl: string;
+  aiSummary: string;
+  like: boolean;
+  createdAt: Date;
 }
 
 const FolderListScreen = ({ route, navigation }: any) => {
   const { folderId, folderName } = route.params;
 
   // 해당 폴더에 속한 북마크들 필터링
-  const folderBookmarks = DUMMY_URLS.filter(url => {
-    if (folderName === '즐겨찾기') return url.isFavorite;
-    return url.category === folderName;
+  const folderBookmarks = BOOKMARK_DATA.filter(url => {
+    if (folderName === '즐겨찾기') return url.like;
+    return url.folderId === folderName;
   });
 
   const renderBookmarkItem = ({ item }: { item: BookmarkItem }) => {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => console.log(`${item.title} 북마크 클릭`)}
+        onPress={() => console.log(`${item.url} 북마크 클릭`)}
       >
-        {item.thumbnail ? (
-          <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+        {item.imageUrl ? (
+          <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
         ) : (
           <View style={[styles.thumbnail, styles.emptyThumbnail]} />
         )}
 
-        {/* HomeScreen과 동일한 반투명 오버레이 */}
         <View style={styles.overlay}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.title}
+            {item.url}
           </Text>
           <Text style={styles.cardSummary} numberOfLines={3}>
-            {item.summary}
+            {item.aiSummary}
           </Text>
         </View>
       </TouchableOpacity>
@@ -86,10 +84,10 @@ const FolderListScreen = ({ route, navigation }: any) => {
             <Text style={styles.emptyText}>아직 저장된 갈피가 없어요</Text>
           </View>
         ) : (
-          <FlatList
+          <FlatList<BookmarkItem>
             data={folderBookmarks}
             renderItem={renderBookmarkItem}
-            keyExtractor={item => item.id}
+            keyExtractor={item => item.bookmarkId.toString()}
             numColumns={2}
             columnWrapperStyle={styles.row}
             showsVerticalScrollIndicator={false}

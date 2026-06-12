@@ -35,7 +35,7 @@ const MainTabNavigator = () => {
         tabBarInactiveTintColor: '#666',
       }}
     >
-      {/* [중요] 각 탭마다 component가 다른 파일로 연결되어 있어야 합니다! */}
+      {/* 각 탭별 파일명 연결하기 */}
       <Tab.Screen name="북마크 추천" component={RecommendScreen} />
       <Tab.Screen name="검색" component={SearchScreen} />
       <Tab.Screen name="홈" component={HomeScreen} />
