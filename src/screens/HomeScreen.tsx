@@ -9,22 +9,26 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { DUMMY_URLS } from '../data/dummyData';
+import { BOOKMARK_DATA } from '../data/dummyData';
 
 // 가로 화면 크기를 기준으로 카드 너비를 계산 (2열 배치를 위해)
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2; // (전체 너비 - 여백 합계) / 2
 
 const HomeScreen = ({ navigation }: any) => {
-  const renderBookmarkItem = ({ item }: { item: (typeof DUMMY_URLS)[0] }) => {
+  const renderBookmarkItem = ({
+    item,
+  }: {
+    item: (typeof BOOKMARK_DATA)[0];
+  }) => {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() => console.log(`${item.id} 클릭됨`)}
+        onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
       >
-        {item.thumbnail ? (
+        {item.imageUrl ? (
           // 썸네일 이미지가 존재할 때
-          <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+          <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
         ) : (
           // 썸네일 이미지가 null일 때 회색 배경
           <View style={[styles.thumbnail, styles.emptyThumbnail]} />
