@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,7 +10,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
-import { BOOKMARK_DATA } from '../data/dummyData';
+import { fetchBookmarks, Bookmark } from '../services/galpiApi';
+
+//import { BOOKMARK_DATA } from '../data/dummyData';
 
 // [수정된 부분 1] 하트 이미지 임포트 (경로는 사용자님의 설명에 따름)
 const HeartOutlineImage = require('../assets/like0.png'); // 테두리 버전
@@ -20,7 +22,7 @@ const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
 
 // [기존 코드 유지] 개별 카드의 상태를 관리하기 위한 컴포넌트
-const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
+const BookmarkCard = ({ item }: { item: Bookmark }) => {
   // 데이터의 like 속성에 따라 초기 상태 설정
   const [isLiked, setIsLiked] = useState(item.like === true);
 
@@ -28,7 +30,7 @@ const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
     setIsLiked(!isLiked);
     // TODO: 여기에 서버나 로컬 DB의 like 상태를 0 또는 1로 업데이트하는 로직을 추가하세요.
     console.log(
-      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+      `${item.id}번 북마크 하트 클릭됨. 현재 상태: ${
         !isLiked ? '1 (Like)' : '0 (Unlike)'
       }`,
     );
@@ -37,7 +39,7 @@ const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
+      onPress={() => console.log(`${item.id} 클릭됨`)}
       activeOpacity={0.9} // 터치 시 너무 투명해지는 것 방지
     >
       {item.imageUrl ? (
@@ -74,11 +76,16 @@ const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
 
 // [기존 HomeScreen 코드 유지]
 const HomeScreen = ({ navigation }: any) => {
-  const renderBookmarkItem = ({
-    item,
-  }: {
-    item: (typeof BOOKMARK_DATA)[0];
-  }) => {
+  // 연동
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+
+  useEffect(() => {
+    fetchBookmarks()
+      .then(data => setBookmarks(data))
+      .catch(err => console.error('북마크 불러오기 실패:', err));
+  }, []);
+
+  const renderBookmarkItem = ({ item }: { item: Bookmark }) => {
     return <BookmarkCard item={item} />;
   };
 
@@ -94,9 +101,9 @@ const HomeScreen = ({ navigation }: any) => {
         <Text style={styles.sectionTitle}>최근 저장한 북마크</Text>
 
         <FlatList
-          data={BOOKMARK_DATA}
+          data={bookmarks}
           renderItem={renderBookmarkItem}
-          keyExtractor={item => item.bookmarkId.toString()}
+          keyExtractor={item => item.id}
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}
