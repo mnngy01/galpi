@@ -103,7 +103,7 @@ const HomeScreen = ({ navigation }: any) => {
         <FlatList
           data={bookmarks}
           renderItem={renderBookmarkItem}
-          keyExtractor={item => item.id}
+          keyExtractor={item => item.id.toString()}
           numColumns={2}
           columnWrapperStyle={styles.row}
           showsVerticalScrollIndicator={false}

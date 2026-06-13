@@ -1,48 +1,54 @@
 // src/hooks/FolderActions.ts
-import { useState } from 'react';
-import { DUMMY_CATEGORIES } from '../data/dummyData';
+import { useState, useEffect } from 'react';
+import { getFolders, createFolder, updateFolder, deleteFolder } from '../services/folderApi';
 
-// 1. API 명세 및 실제 더미 데이터에 맞게 'id'를 'folderId'로 수정
 export interface Folder {
-  folderId: number; // 👈 id에서 folderId로 변경
+  folderId: number;
   name: string;
   higherFolderId: number | null;
   createdAt: string;
 }
 
 export const FolderActions = () => {
-  // 로컬 상태로 카테고리 더미 데이터 관리
-  const [folders, setFolders] = useState<Folder[]>(DUMMY_CATEGORIES);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [folderNameInput, setFolderNameInput] = useState('');
 
-  // 새로운 폴더(카테고리) 추가 기능
+  useEffect(() => {
+    getFolders()
+      .then(data => setFolders(data))
+      .catch(err => console.error('폴더 불러오기 실패:', err));
+  }, []);
+
   const openModal = () => {
     setFolderNameInput('');
     setIsModalVisible(true);
   };
   const closeModal = () => setIsModalVisible(false);
 
-  // 폴더 추가 로직
   const handleAddFolder = () => {
     if (!folderNameInput.trim()) return;
-
-    const newFolder: Folder = {
-      folderId: Date.now(), // 👈 folderId로 매핑
-      name: folderNameInput.trim(),
-      higherFolderId: null,
-      createdAt: new Date().toISOString(),
-    };
-
-    setFolders([...folders, newFolder]);
+    createFolder(folderNameInput.trim())
+      .then(newFolder => setFolders(prev => [...prev, newFolder]))
+      .catch(err => console.error('폴더 생성 실패:', err));
     closeModal();
   };
 
-  // 폴더 삭제 로직
   const handleDeleteFolder = (folderId: number) => {
-    // 👈 id 대신 folderId 사용
-    setFolders(folders.filter(folder => folder.folderId !== folderId));
+    deleteFolder(folderId)
+      .then(() => setFolders(prev => prev.filter(f => f.folderId !== folderId)))
+      .catch(err => console.error('폴더 삭제 실패:', err));
+  };
+
+  const handleUpdateFolder = (folderId: number, name: string) => {
+    updateFolder(folderId, name)
+      .then(updated =>
+        setFolders(prev =>
+          prev.map(f => (f.folderId === folderId ? updated : f)),
+        ),
+      )
+      .catch(err => console.error('폴더 수정 실패:', err));
   };
 
   return {
@@ -57,5 +63,6 @@ export const FolderActions = () => {
     setFolderNameInput,
     handleAddFolder,
     handleDeleteFolder,
+    handleUpdateFolder,
   };
 };

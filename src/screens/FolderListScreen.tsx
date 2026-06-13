@@ -1,5 +1,5 @@
-// src/screens/ .tsx
-import React, { useState } from 'react';
+// FolderListScreen.tsx
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,7 +14,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
-import { BOOKMARK_DATA, DUMMY_CATEGORIES } from '../data/dummyData';
+import { fetchBookmarksByFolder, deleteBookmark, Bookmark } from '../services/bookmarkApi';
+import { getFolders } from '../services/folderApi';
+import { Folder } from '../hooks/FolderActions';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
@@ -23,19 +25,9 @@ const CARD_WIDTH = (width - 60) / 2;
 const HeartOutlineImage = require('../assets/like0.png');
 const HeartFilledImage = require('../assets/like1.png');
 
-interface BookmarkItem {
-  bookmarkId: number;
-  url: string;
-  folderId: number;
-  imageUrl: string;
-  aiSummary: string;
-  like: boolean; // 기존 dummyData 구조에 맞게 boolean 사용 (1/0이라면 boolean으로 캐스팅 필요)
-  createdAt: string;
-}
-
 // --- [추가] 개별 카드의 하트 상태를 관리하기 위한 컴포넌트 ---
 interface BookmarkCardProps {
-  item: BookmarkItem;
+  item: Bookmark;
   isSelectMode: boolean;
   isSelected: boolean;
   onPress: () => void;
@@ -54,7 +46,7 @@ const BookmarkCard = ({
   const toggleLike = () => {
     setIsLiked(!isLiked);
     console.log(
-      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+      `${item.id}번 북마크 하트 클릭됨. 현재 상태: ${
         !isLiked ? 'Like' : 'Unlike'
       }`,
     );
@@ -110,12 +102,7 @@ const BookmarkCard = ({
 const FolderListScreen = ({ route, navigation }: any) => {
   const { folderId, folderName } = route.params;
 
-  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(
-    BOOKMARK_DATA.filter(url => {
-      if (folderName === '즐겨찾기') return url.like;
-      return url.folderId === folderId;
-    }),
-  );
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -123,6 +110,17 @@ const FolderListScreen = ({ route, navigation }: any) => {
 
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState(0);
+  const [movableFolders, setMovableFolders] = useState<Folder[]>([]); 
+
+  useEffect(() => {
+  fetchBookmarksByFolder(folderId)
+    .then((data: Bookmark[]) => setBookmarks(data))
+    .catch((err: any) => console.error('북마크 불러오기 실패:', err));
+
+  getFolders()
+    .then((data: Folder[]) => setMovableFolders(data.filter(f => f.folderId !== folderId)))
+    .catch((err: any) => console.error('폴더 불러오기 실패:', err));
+}, [folderId]);
 
   const enterSelectMode = () => {
     setIsSelectMode(true);
@@ -150,7 +148,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
         style: 'destructive',
         onPress: () => {
           setBookmarks(prev =>
-            prev.filter(b => !selectedIds.has(b.bookmarkId)),
+            prev.filter(b => !selectedIds.has(b.id)),
           );
           exitSelectMode();
         },
@@ -159,16 +157,15 @@ const FolderListScreen = ({ route, navigation }: any) => {
   };
 
   const handleMove = (targetFolderId: number) => {
-    setBookmarks(prev => prev.filter(b => !selectedIds.has(b.bookmarkId)));
+    setBookmarks(prev => prev.filter(b => !selectedIds.has(b.id)));
     setIsMoveModalVisible(false);
     exitSelectMode();
   };
 
-  const movableFolders = DUMMY_CATEGORIES.filter(c => c.folderId !== folderId);
 
   // --- [수정] BookmarkCard 컴포넌트를 호출하여 렌더링하도록 변경 ---
-  const renderBookmarkItem = ({ item }: { item: BookmarkItem }) => {
-    const isSelected = selectedIds.has(item.bookmarkId);
+  const renderBookmarkItem = ({ item }: { item: Bookmark }) => {
+    const isSelected = selectedIds.has(item.id);
 
     return (
       <BookmarkCard
@@ -177,14 +174,14 @@ const FolderListScreen = ({ route, navigation }: any) => {
         isSelected={isSelected}
         onPress={() => {
           if (isSelectMode) {
-            toggleSelect(item.bookmarkId);
+            toggleSelect(item.id);
           } else {
             console.log(`${item.url} 북마크 클릭`);
           }
         }}
         onLongPress={() => {
           if (!isSelectMode) enterSelectMode();
-          toggleSelect(item.bookmarkId);
+          toggleSelect(item.id);
         }}
       />
     );
@@ -261,10 +258,10 @@ const FolderListScreen = ({ route, navigation }: any) => {
             <Text style={styles.emptyText}>아직 저장된 갈피가 없어요</Text>
           </View>
         ) : (
-          <FlatList<BookmarkItem>
+          <FlatList<Bookmark>
             data={bookmarks}
             renderItem={renderBookmarkItem}
-            keyExtractor={item => item.bookmarkId.toString()}
+            keyExtractor={item => item.id.toString()}
             numColumns={2}
             columnWrapperStyle={styles.row}
             showsVerticalScrollIndicator={false}

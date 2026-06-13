@@ -1,5 +1,5 @@
 // src/data/dummyData.ts
-
+/*
 export const DUMMY_MEMBER = {
   name: 'username',
   memberId: 'sujeongi@sungsin.ac.kr',
@@ -155,3 +155,5 @@ export const BOOKMARK_DATA = [
     createdAt: '2026-05-03T22:10:00.000Z',
   },
 ];
+
+*/

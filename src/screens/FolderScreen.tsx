@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import {
+//FolderScreen.tsx
+import React, { useState, useRef, useEffect } from 'react';import {
   StyleSheet,
   View,
   Text,
@@ -15,7 +15,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BOOKMARK_DATA } from '../data/dummyData';
+import { fetchBookmarksByFolder, Bookmark } from '../services/bookmarkApi';
 import { FolderActions, Folder } from '../hooks/FolderActions';
 
 const { width, height } = Dimensions.get('window');
@@ -91,6 +91,18 @@ const FolderScreen = ({ navigation }: any) => {
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
   const [editNameInput, setEditNameInput] = useState('');
 
+  const [folderBookmarks, setFolderBookmarks] = useState<Record<number, Bookmark[]>>({});
+
+  useEffect(() => {
+    folders.forEach(folder => {
+      fetchBookmarksByFolder(folder.folderId)
+        .then((data: Bookmark[]) => {
+          setFolderBookmarks(prev => ({ ...prev, [folder.folderId]: data }));
+        })
+        .catch((err: any) => console.error('북마크 불러오기 실패:', err));
+    });
+  }, [folders]);
+
   const handleLongPressCard = (
     item: Folder,
     pageX: number,
@@ -127,28 +139,24 @@ const FolderScreen = ({ navigation }: any) => {
   };
 
   const renderFolderItem: ListRenderItem<Folder> = ({ item }) => {
-    const categoryBookmarks = BOOKMARK_DATA.filter(bookmark => {
-      if (item.name === '즐겨찾기') return bookmark.like;
-      return bookmark.folderId === item.folderId;
-    });
-    const latestThumbnail =
-      categoryBookmarks[categoryBookmarks.length - 1]?.imageUrl;
+  const categoryBookmarks = folderBookmarks[item.folderId] || [];
+  const latestThumbnail = categoryBookmarks[categoryBookmarks.length - 1]?.imageUrl;
 
-    return (
-      <FolderCard
-        item={item}
-        thumbnail={latestThumbnail}
-        bookmarksCount={categoryBookmarks.length}
-        onLongPress={handleLongPressCard}
-        onPress={() => {
-          navigation.navigate('BookmarkList', {
-            folderId: item.folderId,
-            folderName: item.name,
-          });
-        }}
-      />
-    );
-  };
+  return (
+    <FolderCard
+      item={item}
+      thumbnail={latestThumbnail ?? undefined}
+      bookmarksCount={categoryBookmarks.length}
+      onLongPress={handleLongPressCard}
+      onPress={() => {
+        navigation.navigate('BookmarkList', {
+          folderId: item.folderId,
+          folderName: item.name,
+        });
+      }}
+    />
+  );
+};
 
   return (
     <View style={styles.container}>
