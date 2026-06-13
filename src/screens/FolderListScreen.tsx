@@ -14,9 +14,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
-import { fetchBookmarksByFolder, deleteBookmark, Bookmark } from '../services/bookmarkApi';
-import { getFolders } from '../services/folderApi';
-import { Folder } from '../hooks/FolderActions';
+import {
+  fetchBookmarksByFolder,
+  deleteBookmark,
+  updateBookmark,
+  Bookmark,
+} from '../services/bookmarkApi';
+import { getFolders, Folder } from '../services/folderApi';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
@@ -105,22 +109,25 @@ const FolderListScreen = ({ route, navigation }: any) => {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isMoveModalVisible, setIsMoveModalVisible] = useState(false);
 
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState(0);
-  const [movableFolders, setMovableFolders] = useState<Folder[]>([]); 
+  const [movableFolders, setMovableFolders] = useState<Folder[]>([]);
 
   useEffect(() => {
-  fetchBookmarksByFolder(folderId)
-    .then((data: Bookmark[]) => setBookmarks(data))
-    .catch((err: any) => console.error('북마크 불러오기 실패:', err));
+    fetchBookmarksByFolder(folderId)
+      .then((data: Bookmark[]) => setBookmarks(data))
+      .catch((err: any) => console.error('북마크 불러오기 실패:', err));
 
-  getFolders()
-    .then((data: Folder[]) => setMovableFolders(data.filter(f => f.id !== folderId)))
-    .catch((err: any) => console.error('폴더 불러오기 실패:', err));
-}, [folderId]);
+    getFolders()
+      .then((data: Folder[]) => {
+        console.log('폴더 데이터:', JSON.stringify(data[0])); // 첫번째 폴더 구조 확인
+        setMovableFolders(data.filter(f => f.id !== folderId));
+      })
+      .catch((err: any) => console.error('폴더 불러오기 실패:', err));
+  }, [folderId]);
 
   const enterSelectMode = () => {
     setIsSelectMode(true);
@@ -132,7 +139,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
     setSelectedIds(new Set());
   };
 
-  const toggleSelect = (id: number) => {
+  const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -146,22 +153,44 @@ const FolderListScreen = ({ route, navigation }: any) => {
       {
         text: '삭제',
         style: 'destructive',
-        onPress: () => {
-          setBookmarks(prev =>
-            prev.filter(b => !selectedIds.has(b.id)),
-          );
-          exitSelectMode();
+        onPress: async () => {
+          try {
+            await Promise.all(
+              Array.from(selectedIds).map(id => deleteBookmark(id)),
+            );
+            setBookmarks(prev => prev.filter(b => !selectedIds.has(b.id)));
+            exitSelectMode();
+            navigation.navigate('MainHome', { screen: '폴더' });
+          } catch (err) {
+            console.error('삭제 실패:', err);
+          }
         },
       },
     ]);
   };
 
-  const handleMove = (targetFolderId: string) => {
-    setBookmarks(prev => prev.filter(b => !selectedIds.has(b.id)));
-    setIsMoveModalVisible(false);
-    exitSelectMode();
+  const handleMove = async (targetFolderId: string) => {
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map(id => {
+          const bookmark = bookmarks.find(b => b.id === id);
+          return updateBookmark(id, {
+            url: bookmark?.url,
+            folderId: targetFolderId,
+            imageUrl: bookmark?.imageUrl ?? '', // null → 빈 문자열로
+          });
+        }),
+      );
+      const refreshed = await fetchBookmarksByFolder(folderId);
+      setBookmarks(refreshed);
+      setIsMoveModalVisible(false);
+      exitSelectMode();
+      // 탭 네비게이터 안의 '폴더' 탭으로 이동
+      navigation.navigate('MainHome', { screen: '폴더' });
+    } catch (err) {
+      console.error('이동 실패:', err);
+    }
   };
-
 
   // --- [수정] BookmarkCard 컴포넌트를 호출하여 렌더링하도록 변경 ---
   const renderBookmarkItem = ({ item }: { item: Bookmark }) => {
@@ -261,7 +290,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
           <FlatList<Bookmark>
             data={bookmarks}
             renderItem={renderBookmarkItem}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={item => item.id}
             numColumns={2}
             columnWrapperStyle={styles.row}
             showsVerticalScrollIndicator={false}
@@ -325,7 +354,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
 
             <FlatList
               data={movableFolders}
-              keyExtractor={item => item.id.toString()}
+              keyExtractor={item => item.id ?? Math.random().toString()}
               style={styles.folderList}
               renderItem={({ item }) => (
                 <TouchableOpacity
@@ -412,7 +441,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#E0E0E0',
   },
-  cardSelected: { opacity: 0.75, borderWidth: 3, borderColor: '#FFB899' },
+  cardSelected: { opacity: 0.75, borderWidth: 1, borderColor: '#FFB899' },
   thumbnail: { width: '100%', height: '100%', position: 'absolute' },
   emptyThumbnail: { backgroundColor: '#D1D1D6' },
   overlay: {

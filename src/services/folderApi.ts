@@ -31,7 +31,10 @@ export const createFolder = async (name: string): Promise<Folder> => {
 };
 
 // 폴더 수정
-export const updateFolder = async (id: string, name: string): Promise<Folder> => {
+export const updateFolder = async (
+  id: string,
+  name: string,
+): Promise<Folder> => {
   const response = await fetch(`${BASE_URL}/folders/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
