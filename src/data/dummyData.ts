@@ -77,7 +77,8 @@ export const BOOKMARK_DATA = [
     url: 'https://youtu.be/my_7f-tY1tA?si=ISjPwKC1laH4LGrE',
     folderId: 1,
     imageUrl: 'data:image/jpeg;base64,...',
-    aiSummary: '파리 주요 관광지를 3일 동안 효율적으로 여행하는 일정 소개',
+    aiSummary:
+      '수박 당도 표기 브릭스(Brix)의 방법 안내\n키워드: 수박, 당도, 브릭스, 과일, 맛, 선별, 비파괴 측정, 구매, 품질, 식감',
     like: true,
     createdAt: '2026-05-10T14:32:00.000Z', // new Date() → string
   },

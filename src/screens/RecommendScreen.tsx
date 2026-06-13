@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { BOOKMARK_DATA } from '../data/dummyData';
 
 // const BASE_URL = 'http://10.0.2.2:8000';
@@ -39,7 +41,7 @@ const RecommendCard = ({ item }: { item: Bookmark }) => (
         {getSourceName(item.url)}
       </Text>
       {item.aiSummary && (
-        <Text style={styles.recommendCardSummary} numberOfLines={4}>
+        <Text style={styles.recommendCardSummary} numberOfLines={2}>
           {item.aiSummary}
         </Text>
       )}
@@ -79,7 +81,7 @@ const RecentCard = ({ item }: { item: Bookmark }) => {
         <Text style={styles.recentCardTitle} numberOfLines={1}>
           {getSourceName(item.url)}
         </Text>
-        <Text style={styles.recentCardSummary} numberOfLines={3}>
+        <Text style={styles.recentCardSummary} numberOfLines={2}>
           {item.aiSummary}
         </Text>
       </View>
@@ -102,6 +104,7 @@ const RecentCard = ({ item }: { item: Bookmark }) => {
 // ─── 메인 스크린 ───
 const RecommendScreen = () => {
   // ── 더미 데이터: 추천 3개, 최근 저장 전체 ──
+  const insets = useSafeAreaInsets();
   const recommendList = BOOKMARK_DATA.slice(0, 3);
   const recentList = BOOKMARK_DATA;
 
@@ -133,10 +136,10 @@ const RecommendScreen = () => {
   const icon = require('../assets/icon_galpi.png');
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* ── 추천 섹션 ── */}
-        <View style={styles.hero}>
+        <View style={[styles.hero, { paddingTop: insets.top + 8 }]}>
           <Image
             source={icon}
             style={styles.bookmarkShape}
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
 
   // ── 추천 섹션 ──
   hero: {
-    paddingTop: 22,
+    paddingTop: 15,
     paddingBottom: 28,
     backgroundColor: '#FFE4DA',
   },
