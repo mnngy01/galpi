@@ -20,10 +20,10 @@ interface BookmarkItem {
   bookmarkId: number;
   url: string;
   folderId: number;
-  imageUrl: string | null;
+  imageUrl: string;
   aiSummary: string;
   like: boolean;
-  createdAt: Date;
+  createdAt: string;
 }
 
 const SearchScreen = () => {
