@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
-import { fetchBookmarks, Bookmark } from '../services/galpiApi';
+import { fetchBookmarks, Bookmark } from '../services/bookmarkApi';
 
 //import { BOOKMARK_DATA } from '../data/dummyData';
 

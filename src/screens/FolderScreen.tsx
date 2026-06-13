@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BOOKMARK_DATA } from '../data/dummyData';
-import { FolderActions, CategoryItem } from '../hooks/FolderActions';
+import { FolderActions, Folder } from '../hooks/FolderActions';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = (width - 48) / 2;
@@ -30,12 +30,12 @@ const FolderCard = ({
   onPress,
   onLongPress,
 }: {
-  item: CategoryItem;
+  item: Folder;
   thumbnail?: string;
   bookmarksCount: number;
   onPress: () => void;
   onLongPress: (
-    item: CategoryItem,
+    item: Folder,
     pageX: number,
     pageY: number,
     cardWidth: number,
@@ -86,13 +86,13 @@ const FolderScreen = ({ navigation }: any) => {
     handleDeleteFolder,
   } = FolderActions();
 
-  const [activeFolder, setActiveFolder] = useState<CategoryItem | null>(null);
+  const [activeFolder, setActiveFolder] = useState<Folder | null>(null);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
   const [editNameInput, setEditNameInput] = useState('');
 
   const handleLongPressCard = (
-    item: CategoryItem,
+    item: Folder,
     pageX: number,
     pageY: number,
     cardWidth: number,
@@ -115,7 +115,7 @@ const FolderScreen = ({ navigation }: any) => {
 
   const handleUpdateFolder = () => {
     if (!editNameInput.trim() || !activeFolder) return;
-    setFolders((prev: CategoryItem[]) =>
+    setFolders((prev: Folder[]) =>
       prev.map(f =>
         f.folderId === activeFolder.folderId
           ? { ...f, name: editNameInput.trim() }
@@ -126,7 +126,7 @@ const FolderScreen = ({ navigation }: any) => {
     setActiveFolder(null);
   };
 
-  const renderFolderItem: ListRenderItem<CategoryItem> = ({ item }) => {
+  const renderFolderItem: ListRenderItem<Folder> = ({ item }) => {
     const categoryBookmarks = BOOKMARK_DATA.filter(bookmark => {
       if (item.name === '즐겨찾기') return bookmark.like;
       return bookmark.folderId === item.folderId;

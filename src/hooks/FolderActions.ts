@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { DUMMY_CATEGORIES } from '../data/dummyData';
 
 // 1. API 명세 및 실제 더미 데이터에 맞게 'id'를 'folderId'로 수정
-export interface CategoryItem {
+export interface Folder {
   folderId: number; // 👈 id에서 folderId로 변경
   name: string;
   higherFolderId: number | null;
@@ -12,7 +12,7 @@ export interface CategoryItem {
 
 export const FolderActions = () => {
   // 로컬 상태로 카테고리 더미 데이터 관리
-  const [folders, setFolders] = useState<CategoryItem[]>(DUMMY_CATEGORIES);
+  const [folders, setFolders] = useState<Folder[]>(DUMMY_CATEGORIES);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [folderNameInput, setFolderNameInput] = useState('');
@@ -28,7 +28,7 @@ export const FolderActions = () => {
   const handleAddFolder = () => {
     if (!folderNameInput.trim()) return;
 
-    const newFolder: CategoryItem = {
+    const newFolder: Folder = {
       folderId: Date.now(), // 👈 folderId로 매핑
       name: folderNameInput.trim(),
       higherFolderId: null,
