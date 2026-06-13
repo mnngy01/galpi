@@ -23,10 +23,11 @@ export const createFolder = async (name: string): Promise<Folder> => {
   const response = await fetch(`${BASE_URL}/folders`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, higherFolderId: null }), // ← 추가
   });
-  if (!response.ok) throw new Error('폴더 등록 실패');
   const json = await response.json();
+  console.log('createFolder 응답:', JSON.stringify(json));
+  if (!response.ok) throw new Error('폴더 등록 실패');
   return json.data;
 };
 
