@@ -1,4 +1,4 @@
-// src/screens/BookmarkListScreen.tsx
+// src/screens/ .tsx
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -13,6 +13,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getSourceName } from '../utils/getSourceName';
 import { BOOKMARK_DATA, DUMMY_CATEGORIES } from '../data/dummyData';
 
 const { width } = Dimensions.get('window');
@@ -74,7 +75,7 @@ const BookmarkCard = ({
 
       <View style={styles.overlay}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.url}
+          {getSourceName(item.url)}
         </Text>
         <Text style={styles.cardSummary} numberOfLines={3}>
           {item.aiSummary}

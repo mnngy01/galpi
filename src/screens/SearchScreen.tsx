@@ -12,6 +12,7 @@ import {
   Linking, // 원문 이동을 위한 Linking 유지
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getSourceName } from '../utils/getSourceName';
 // 상단 외부 데이터 파일에서 DUMMY_URLS 명확히 import 완료
 import { BOOKMARK_DATA } from '../data/dummyData';
 
@@ -71,7 +72,7 @@ const SearchScreen = () => {
         {/* 30% 불투명도의 검은색 배경 오버레이 레이어 */}
         <View style={styles.overlay}>
           <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.url}
+            {getSourceName(item.url)}
           </Text>
           <Text style={styles.cardSummary} numberOfLines={2}>
             {item.aiSummary}

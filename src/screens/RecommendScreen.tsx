@@ -1,100 +1,167 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  Dimensions,
+  Image,
   ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getSourceName } from '../utils/getSourceName';
+import { BOOKMARK_DATA } from '../data/dummyData';
 
-const topCards = [
-  {
-    id: '1',
-    title: 'titletitiletitle',
-    summary: '파리 주요 관광지를 3일 동안 효율적으로 여행하는 일정 소개',
-    source: '네이버 블로그',
-    image:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: '2',
-    title: 'titletitiletitle',
-    summary: '오약요약요약요약아정도로기는 휠니님을거같은데세줄넘겠나요약...',
-    source: 'tistory',
-    image:
-      'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=600&q=80',
-  },
-  {
-    id: '3',
-    title: 'titletitiletitle',
-    summary: '요즘 자주 보는 링크와 비슷한 추천 콘텐츠',
-    source: '브런치',
-    image:
-      'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80',
-  },
-];
+// const BASE_URL = 'http://10.0.2.2:8000';
 
-const placeholderCards = ['1', '2'];
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const SmallCard = ({ item }: { item: (typeof topCards)[number] }) => (
+interface Bookmark {
+  bookmarkId: number;
+  url: string;
+  folderId: number;
+  imageUrl: string | null;
+  aiSummary: string | null;
+  like: boolean;
+  createdAt: string;
+}
+
+// ─── 추천 카드 ───
+const RecommendCard = ({ item }: { item: Bookmark }) => (
   <ImageBackground
-    source={{ uri: item.image }}
-    style={styles.smallCard}
-    imageStyle={styles.smallCardImage}
+    source={item.imageUrl ? { uri: item.imageUrl } : undefined}
+    style={styles.recommendCard}
+    imageStyle={styles.recommendCardImage}
   >
-    <View style={styles.cardDim}>
-      <Text style={styles.cardTitle} numberOfLines={1}>
-        {item.title}
+    <View style={styles.recommendCardDim}>
+      <Text style={styles.recommendCardUrl} numberOfLines={1}>
+        {getSourceName(item.url)}
       </Text>
-      <Text style={styles.cardSummary} numberOfLines={3}>
-        {item.summary}
-      </Text>
-      <Text style={styles.cardSource}>{item.source}</Text>
+      {item.aiSummary && (
+        <Text style={styles.recommendCardSummary} numberOfLines={4}>
+          {item.aiSummary}
+        </Text>
+      )}
     </View>
   </ImageBackground>
 );
 
-const EmptyCard = () => <View style={styles.emptyCard} />;
+const HeartOutlineImage = require('../assets/like0.png'); // 테두리 버전
+const HeartFilledImage = require('../assets/like1.png'); // 채워진 버전
 
+// ─── 최근 저장 카드 ───
+const RecentCard = ({ item }: { item: Bookmark }) => {
+  const [isLiked, setIsLiked] = useState(item.like === true);
+
+  const toggleLike = () => {
+    setIsLiked(!isLiked);
+    console.log(
+      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+        !isLiked ? '1 (Like)' : '0 (Unlike)'
+      }`,
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.recentCard}
+      onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
+      activeOpacity={0.9}
+    >
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.recentThumbnail} />
+      ) : (
+        <View style={[styles.recentThumbnail, styles.emptyThumbnail]} />
+      )}
+
+      <View style={styles.recentOverlay}>
+        <Text style={styles.recentCardTitle} numberOfLines={1}>
+          {getSourceName(item.url)}
+        </Text>
+        <Text style={styles.recentCardSummary} numberOfLines={3}>
+          {item.aiSummary}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.heartButton}
+        onPress={toggleLike}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+      >
+        <Image
+          source={isLiked ? HeartFilledImage : HeartOutlineImage}
+          style={styles.heartImage}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+};
+
+// ─── 메인 스크린 ───
 const RecommendScreen = () => {
+  // ── 더미 데이터: 추천 3개, 최근 저장 전체 ──
+  const recommendList = BOOKMARK_DATA.slice(0, 3);
+  const recentList = BOOKMARK_DATA;
+
+  // ── API 연결 시 아래 주석 해제 ──
+  // const [recommendList, setRecommendList] = useState<Bookmark[]>([]);
+  // const [recentList, setRecentList] = useState<Bookmark[]>([]);
+  // const [loading, setLoading] = useState(true);
+  //
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [recommendRes, recentRes] = await Promise.all([
+  //         fetch(`${BASE_URL}/bookmarks/recommend`),
+  //         fetch(`${BASE_URL}/bookmarks/remind`),
+  //       ]);
+  //       const recommendJson = await recommendRes.json();
+  //       const recentJson = await recentRes.json();
+  //       setRecommendList(recommendJson.data ?? []);
+  //       setRecentList(recentJson.data ?? []);
+  //     } catch (e) {
+  //       console.error('API 요청 실패:', e);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
+  const icon = require('../assets/icon_galpi.png');
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        {/* ── 추천 섹션 ── */}
         <View style={styles.hero}>
-          <View style={styles.bookmark} />
-          <Text style={styles.heroTitle}>
-            00님, 요즘 이런 거 많이 보고 있네요
-          </Text>
-
+          <Image
+            source={icon}
+            style={styles.bookmarkShape}
+            resizeMode="contain"
+          />
+          <Text style={styles.heroTitle}>오늘의 갈피</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            pagingEnabled
             contentContainerStyle={styles.horizontalList}
           >
-            {topCards.map(item => (
-              <SmallCard key={item.id} item={item} />
+            {recommendList.map(item => (
+              <RecommendCard key={item.bookmarkId} item={item} />
             ))}
           </ScrollView>
         </View>
 
+        {/* ── 최근 저장 섹션 ── */}
         <View style={styles.section}>
           <Text style={styles.pinIcon}>⌖</Text>
-          <Text style={styles.sectionTitle}>
-            이번 주말 날씨 좋은데 여기 어때요?
-          </Text>
-          <View style={styles.cardRow}>
-            {placeholderCards.map(id => (
-              <EmptyCard key={id} />
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>잊고 있던 거 아니에요?</Text>
-          <View style={styles.cardRow}>
-            {placeholderCards.map(id => (
-              <EmptyCard key={id} />
+          <Text style={styles.sectionTitle}>최근에 저장했어요.</Text>
+          <View style={styles.recentList}>
+            {recentList.map(item => (
+              <RecentCard key={item.bookmarkId} item={item} />
             ))}
           </View>
         </View>
@@ -108,24 +175,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+
+  // ── 추천 섹션 ──
   hero: {
     paddingTop: 22,
     paddingBottom: 28,
     backgroundColor: '#FFE4DA',
   },
-  bookmark: {
+  bookmarkShape: {
     width: 22,
     height: 38,
     marginLeft: 28,
     marginBottom: 22,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#F3D7CC',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: '#000000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 5,
+    shadowRadius: 10,
+    elevation: 10,
   },
   heroTitle: {
     marginHorizontal: 28,
@@ -136,49 +202,47 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   horizontalList: {
-    paddingHorizontal: 32,
-    gap: 24,
+    paddingHorizontal: 24,
+    gap: 16,
   },
-  smallCard: {
-    width: 180,
-    height: 150,
+  recommendCard: {
+    width: SCREEN_WIDTH - 48,
+    height: 180,
+    borderRadius: 20,
     overflow: 'hidden',
-    borderRadius: 18,
     backgroundColor: '#D9D9D9',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.24,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
-    elevation: 8,
+    elevation: 6,
   },
-  smallCardImage: {
-    borderRadius: 18,
+  recommendCardImage: {
+    borderRadius: 20,
   },
-  cardDim: {
+  recommendCardDim: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.38)',
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.38)',
+    justifyContent: 'flex-end',
   },
-  cardTitle: {
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: '800',
-    color: '#FFFFFF',
-  },
-  cardSummary: {
-    marginTop: 4,
-    fontSize: 13,
-    lineHeight: 18,
-    color: '#FFFFFF',
-  },
-  cardSource: {
-    marginTop: 'auto',
+  recommendCardUrl: {
     fontSize: 12,
+    color: 'rgba(255,255,255,0.65)',
+    marginBottom: 6,
+  },
+  recommendCardSummary: {
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '700',
     color: '#FFFFFF',
   },
+
+  // ── 최근 저장 섹션 ──
   section: {
     paddingTop: 42,
     paddingHorizontal: 24,
+    paddingBottom: 40,
   },
   pinIcon: {
     marginBottom: 6,
@@ -186,26 +250,60 @@ const styles = StyleSheet.create({
     color: '#CFCFD6',
   },
   sectionTitle: {
-    marginBottom: 20,
-    fontSize: 24,
+    marginBottom: 15,
+    fontSize: 18,
     lineHeight: 32,
     fontWeight: '800',
-    color: '#000000',
+    color: '#2e2e2e',
   },
-  cardRow: {
-    flexDirection: 'row',
-    gap: 22,
+  recentList: {
+    gap: 16,
   },
-  emptyCard: {
-    width: 155,
-    height: 190,
-    borderRadius: 24,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.1,
-    shadowRadius: 18,
-    elevation: 5,
+  // ── 최근 저장 카드 (기존 recentCardBody 제거, overlay/heartImage 추가) ──
+  recentCard: {
+    height: 160, // 원하는 높이로 조절
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: '#D1D1D6',
+  },
+  recentThumbnail: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute', // HomeScreen과 동일: 카드 전체를 채움
+  },
+  emptyThumbnail: {
+    backgroundColor: '#D1D1D6',
+  },
+  recentOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(50, 65, 100, 0.45)', // HomeScreen과 동일한 오버레이 색
+    padding: 14,
+    justifyContent: 'flex-start',
+  },
+  recentCardTitle: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  recentCardSummary: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  heartButton: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    zIndex: 10,
+    width: 20,
+    height: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heartImage: {
+    width: '100%',
+    height: '100%',
   },
 });
 

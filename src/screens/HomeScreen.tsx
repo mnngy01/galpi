@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { getSourceName } from '../utils/getSourceName';
 import { BOOKMARK_DATA } from '../data/dummyData';
 
 // [수정된 부분 1] 하트 이미지 임포트 (경로는 사용자님의 설명에 따름)
@@ -47,7 +48,7 @@ const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
 
       <View style={styles.overlay}>
         <Text style={styles.cardTitle} numberOfLines={1}>
-          {item.url}
+          {getSourceName(item.url)}
         </Text>
         <Text style={styles.cardSummary} numberOfLines={3}>
           {item.aiSummary}
