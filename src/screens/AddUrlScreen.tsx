@@ -1,15 +1,26 @@
 // src/screens/AddUrlScreen.tsx
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { addBookmark } from '../services/bookmarkApi';
 
 const AddUrlScreen = ({ navigation }: any) => {
   const [url, setUrl] = useState('');
 
-  const handleSave = () => {
-    console.log('저장된 URL:', url);
-    // 여기에 나중에 데이터 저장 로직을 넣을 예정입니다.
-    navigation.goBack();
+  const handleSave = async () => {
+    if (!url.trim()) return;
+    try {
+      await addBookmark(url.trim());
+      navigation.goBack();
+    } catch (err) {
+      console.error('북마크 저장 실패:', err);
+    }
   };
 
   return (

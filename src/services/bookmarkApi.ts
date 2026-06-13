@@ -27,14 +27,11 @@ export const fetchBookmarksByFolder = async (
 };
 
 // POST /bookmarks - 북마크 등록
-export const addBookmark = async (
-  url: string,
-  folderId: string,
-): Promise<Bookmark> => {
+export const addBookmark = async (url: string): Promise<Bookmark> => {
   const response = await fetch(`${BASE_URL}/bookmarks`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, folderId }),
+    body: JSON.stringify({ url }),
   });
   const json = await response.json();
   return json.data;

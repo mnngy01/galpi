@@ -10,7 +10,7 @@ export const getSourceName = (url: string): string => {
   if (url.includes('github')) return 'GitHub';
   if (url.includes('notion')) return 'Notion';
   if (url.includes('news')) return 'News';
-  if (url.includes('shopping')) return 'Shopping';
+  if (url.includes('tistory')) return 'Tistory';
 
   try {
     const domain = new URL(url).hostname.replace('www.', '');
