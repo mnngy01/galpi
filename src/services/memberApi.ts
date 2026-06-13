@@ -40,3 +40,14 @@ export const postInterests = async (interests: string[]): Promise<void> => {
   console.log('관심사 등록 응답:', JSON.stringify(json));
   if (!response.ok) throw new Error('관심사 등록 실패');
 };
+
+// GET /members/{memberId} - 회원 정보 조회
+export const getMember = async (): Promise<Member> => {
+  const response = await fetch(`${BASE_URL}/members/${MEMBER_ID}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const json = await response.json();
+  if (!response.ok) throw new Error('회원 정보 조회 실패');
+  return json.data;
+};

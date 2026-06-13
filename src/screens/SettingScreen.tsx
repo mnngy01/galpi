@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Alert,
   Image,
@@ -9,48 +9,19 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-type Member = {
-  id: number;
-  name: string;
-  memberId: string;
-  memberPw: string;
-  birth: string;
-  phone: number;
-  aiRecommendAlert: boolean;
-  aiSummary: boolean;
-  aiSave: boolean;
-  imageUrl: string;
-  createdAt: string;
-};
-// 더미데이터
-const initialMember: Member = {
-  id: 123,
-  name: 'username',
-  memberId: 'sujeongi@sungsin.ac.kr',
-  memberPw: 'password123!',
-  birth: '2000-01-01',
-  phone: 1012345678,
-  aiRecommendAlert: true,
-  aiSummary: true,
-  aiSave: false,
-  imageUrl: '',
-  createdAt: '2024-02-22T07:47:49.803Z',
-};
+import { getMember, Member } from '../services/memberApi';
 
 const SettingScreen = ({ navigation }: any) => {
-  const [member] = useState<Member>(initialMember);
+  const [member, setMember] = useState<Member | null>(null);
+
+  useEffect(() => {
+    getMember()
+      .then(data => setMember(data))
+      .catch(err => console.error('회원 정보 불러오기 실패:', err));
+  }, []);
 
   const handleEditProfile = () => {
-    console.log('회원정보 수정 이동:', member.id);
-  };
-
-  const handleAiSetting = () => {
-    console.log('AI기능 설정 이동:', {
-      aiRecommendAlert: member.aiRecommendAlert,
-      aiSummary: member.aiSummary,
-      aiSave: member.aiSave,
-    });
+    console.log('회원정보 수정 이동:', member?.id);
   };
 
   const handleLogout = () => {
@@ -79,18 +50,14 @@ const SettingScreen = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.profileSection}>
-          {member.imageUrl ? (
-            <Image
-              source={{ uri: member.imageUrl }}
-              style={styles.profileImage}
-            />
-          ) : (
-            <View style={styles.profileImagePlaceholder} />
-          )}
+          <Image
+            source={require('../assets/logo_pink_2.png')} // 원하는 기본 이미지 경로로 교체
+            style={styles.profileImage}
+          />
 
           <View style={styles.profileInfo}>
-            <Text style={styles.userName}>{member.name}</Text>
-            <Text style={styles.memberId}>{member.memberId}</Text>
+            <Text style={styles.userName}>{member?.name}</Text>
+            <Text style={styles.memberId}>{member?.loginId}</Text>
             <TouchableOpacity
               style={styles.editButton}
               onPress={handleEditProfile}
@@ -105,7 +72,7 @@ const SettingScreen = ({ navigation }: any) => {
 
         <View style={styles.settingSection}>
           <Text style={styles.sectionLabel}>설정</Text>
-          <TouchableOpacity onPress={handleAiSetting} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => {}} activeOpacity={0.7}>
             <Text style={styles.settingTitle}>AI기능 설정</Text>
           </TouchableOpacity>
         </View>
