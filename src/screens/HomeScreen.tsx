@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -11,53 +11,84 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BOOKMARK_DATA } from '../data/dummyData';
 
-// 가로 화면 크기를 기준으로 카드 너비를 계산 (2열 배치를 위해)
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 60) / 2; // (전체 너비 - 여백 합계) / 2
+// [수정된 부분 1] 하트 이미지 임포트 (경로는 사용자님의 설명에 따름)
+const HeartOutlineImage = require('../assets/like0.png'); // 테두리 버전
+const HeartFilledImage = require('../assets/like1.png'); // 채워진 버전
 
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 60) / 2;
+
+// [기존 코드 유지] 개별 카드의 상태를 관리하기 위한 컴포넌트
+const BookmarkCard = ({ item }: { item: (typeof BOOKMARK_DATA)[0] }) => {
+  // 데이터의 like 속성에 따라 초기 상태 설정
+  const [isLiked, setIsLiked] = useState(item.like === true);
+
+  const toggleLike = () => {
+    setIsLiked(!isLiked);
+    // TODO: 여기에 서버나 로컬 DB의 like 상태를 0 또는 1로 업데이트하는 로직을 추가하세요.
+    console.log(
+      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+        !isLiked ? '1 (Like)' : '0 (Unlike)'
+      }`,
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
+      activeOpacity={0.9} // 터치 시 너무 투명해지는 것 방지
+    >
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
+      ) : (
+        <View style={[styles.thumbnail, styles.emptyThumbnail]} />
+      )}
+
+      <View style={styles.overlay}>
+        <Text style={styles.cardTitle} numberOfLines={1}>
+          {item.url}
+        </Text>
+        <Text style={styles.cardSummary} numberOfLines={3}>
+          {item.aiSummary}
+        </Text>
+      </View>
+
+      {/* [수정된 부분 2] 우측 하단 하트 이미지 버튼 */}
+      <TouchableOpacity
+        style={styles.heartButton}
+        onPress={toggleLike}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} // 터치 영역 확보
+      >
+        {/* [수정된 부분 3] <Text> 대신 <Image> 사용 */}
+        <Image
+          source={isLiked ? HeartFilledImage : HeartOutlineImage}
+          style={styles.heartImage}
+          resizeMode="contain" // 이미지 비율 유지
+        />
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+};
+
+// [기존 HomeScreen 코드 유지]
 const HomeScreen = ({ navigation }: any) => {
   const renderBookmarkItem = ({
     item,
   }: {
     item: (typeof BOOKMARK_DATA)[0];
   }) => {
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
-      >
-        {item.imageUrl ? (
-          // 썸네일 이미지가 존재할 때
-          <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
-        ) : (
-          // 썸네일 이미지가 null일 때 회색 배경
-          <View style={[styles.thumbnail, styles.emptyThumbnail]} />
-        )}
-
-        {/* 이미지 혹은 회색 배경 위에 얹어지는 반투명 필터 레이어 */}
-        <View style={styles.overlay}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.url}
-          </Text>
-          <Text style={styles.cardSummary} numberOfLines={3}>
-            {item.aiSummary}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
+    return <BookmarkCard item={item} />;
   };
 
   return (
-    // 최상단을 SafeAreaView 대신 일반 View로 교체하여 화면 전체(맨 바닥까지)를 사용하네!
     <View style={styles.container}>
-      {/* 상단 로고 헤더 영역만 노치에 가려지지 않게 SafeAreaView로 감싸주었네. */}
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
           <Text style={styles.logoText}>GALPI</Text>
         </View>
       </SafeAreaView>
 
-      {/* 최근 저장한 북마크 리스트 영역 */}
       <View style={styles.contentWrapper}>
         <Text style={styles.sectionTitle}>최근 저장한 북마크</Text>
 
@@ -72,7 +103,6 @@ const HomeScreen = ({ navigation }: any) => {
         />
       </View>
 
-      {/* 우측 하단 Floating Action Button (+) */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('AddUrl')}
@@ -82,11 +112,10 @@ const HomeScreen = ({ navigation }: any) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  headerSafeArea: {
-    backgroundColor: '#FFFFFF',
-  },
+  headerSafeArea: { backgroundColor: '#FFFFFF' },
   header: {
     height: 60,
     justifyContent: 'center',
@@ -99,13 +128,8 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: '#000',
   },
-  contentWrapper: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  listContainer: {
-    paddingBottom: 100, // 하단 탭바와 + 버튼(FAB) 높이를 고려해 아래쪽에 충분한 공백을 줌
-  },
+  contentWrapper: { flex: 1, paddingHorizontal: 20 },
+  listContainer: { paddingBottom: 100 },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -113,47 +137,46 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: 10,
   },
-  row: {
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-
+  row: { justifyContent: 'space-between', marginBottom: 15 },
   card: {
     width: CARD_WIDTH,
     height: CARD_WIDTH - 20,
-    borderRadius: 20, //라운딩
-    overflow: 'hidden', // 라운딩 영역 바깥으로 컨텐츠가 깨져 나가는 것 방지
+    borderRadius: 20,
+    overflow: 'hidden',
     backgroundColor: '#E0E0E0',
   },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  emptyThumbnail: {
-    backgroundColor: '#D1D1D6', // 썸네일 null일 때 깔리는 기본 회색톤
-  },
-
-  // 회색빛 네이비 반투명 오버레이 스타일
+  thumbnail: { width: '100%', height: '100%', position: 'absolute' },
+  emptyThumbnail: { backgroundColor: '#D1D1D6' },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(50, 65, 100, 0.45)', // 사진 특유의 반투명 무드 처리
+    backgroundColor: 'rgba(50, 65, 100, 0.45)',
     padding: 14,
     justifyContent: 'flex-start',
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#FFFFFF', // 흰색 텍스트
+    color: '#FFFFFF',
     marginBottom: 4,
   },
-  cardSummary: {
-    fontSize: 12,
-    color: '#FFFFFF', // 흰색 텍스트
-    lineHeight: 16,
+  cardSummary: { fontSize: 12, color: '#FFFFFF', lineHeight: 16 },
+
+  // ---하트 버튼 및 이미지 스타일 ---
+  heartButton: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    zIndex: 10,
+    width: 20, // 이미지 버튼 전체 크기
+    height: 22, // 이미지 버튼 전체 크기
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  heartImage: {
+    width: '100%', // 버튼 안에 가득 차게
+    height: '100%', // 버튼 안에 가득 차게
   },
 
-  // + 버튼 스타일
   fab: {
     position: 'absolute',
     right: 25,
@@ -170,12 +193,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
-  fabText: {
-    fontSize: 35,
-    color: '#FFF',
-    fontWeight: '300',
-    marginTop: -4,
-  },
+  fabText: { fontSize: 35, color: '#FFF', fontWeight: '300', marginTop: -4 },
 });
 
 export default HomeScreen;

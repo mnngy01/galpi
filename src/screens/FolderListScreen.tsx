@@ -18,15 +18,93 @@ import { BOOKMARK_DATA, DUMMY_CATEGORIES } from '../data/dummyData';
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 60) / 2;
 
+// --- [추가] 하트 이미지 임포트 ---
+const HeartOutlineImage = require('../assets/like0.png');
+const HeartFilledImage = require('../assets/like1.png');
+
 interface BookmarkItem {
   bookmarkId: number;
   url: string;
   folderId: number;
   imageUrl: string;
   aiSummary: string;
-  like: boolean;
+  like: boolean; // 기존 dummyData 구조에 맞게 boolean 사용 (1/0이라면 boolean으로 캐스팅 필요)
   createdAt: string;
 }
+
+// --- [추가] 개별 카드의 하트 상태를 관리하기 위한 컴포넌트 ---
+interface BookmarkCardProps {
+  item: BookmarkItem;
+  isSelectMode: boolean;
+  isSelected: boolean;
+  onPress: () => void;
+  onLongPress: () => void;
+}
+
+const BookmarkCard = ({
+  item,
+  isSelectMode,
+  isSelected,
+  onPress,
+  onLongPress,
+}: BookmarkCardProps) => {
+  const [isLiked, setIsLiked] = useState(item.like);
+
+  const toggleLike = () => {
+    setIsLiked(!isLiked);
+    console.log(
+      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+        !isLiked ? 'Like' : 'Unlike'
+      }`,
+    );
+  };
+
+  return (
+    <TouchableOpacity
+      style={[styles.card, isSelected && styles.cardSelected]}
+      activeOpacity={0.8}
+      onPress={onPress}
+      onLongPress={onLongPress}
+    >
+      {item.imageUrl ? (
+        <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
+      ) : (
+        <View style={[styles.thumbnail, styles.emptyThumbnail]} />
+      )}
+
+      <View style={styles.overlay}>
+        <Text style={styles.cardTitle} numberOfLines={1}>
+          {item.url}
+        </Text>
+        <Text style={styles.cardSummary} numberOfLines={3}>
+          {item.aiSummary}
+        </Text>
+      </View>
+
+      {/* 우측 하단 UI 분기 처리: 선택 모드일 때는 체크표시, 아닐 때는 하트표시 */}
+      {isSelectMode ? (
+        <View
+          style={[styles.checkCircle, isSelected && styles.checkCircleSelected]}
+        >
+          {isSelected && <Text style={styles.checkMark}>✓</Text>}
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.heartButton}
+          onPress={toggleLike}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
+          <Image
+            source={isLiked ? HeartFilledImage : HeartOutlineImage}
+            style={styles.heartImage}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+};
+// -------------------------------------------------------------
 
 const FolderListScreen = ({ route, navigation }: any) => {
   const { folderId, folderName } = route.params;
@@ -42,7 +120,6 @@ const FolderListScreen = ({ route, navigation }: any) => {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isMoveModalVisible, setIsMoveModalVisible] = useState(false);
 
-  // 💡 [추가] ••• 버튼 드롭다운 팝업 관련 상태
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState(0);
 
@@ -88,13 +165,15 @@ const FolderListScreen = ({ route, navigation }: any) => {
 
   const movableFolders = DUMMY_CATEGORIES.filter(c => c.folderId !== folderId);
 
+  // --- [수정] BookmarkCard 컴포넌트를 호출하여 렌더링하도록 변경 ---
   const renderBookmarkItem = ({ item }: { item: BookmarkItem }) => {
     const isSelected = selectedIds.has(item.bookmarkId);
 
     return (
-      <TouchableOpacity
-        style={[styles.card, isSelected && styles.cardSelected]}
-        activeOpacity={0.8}
+      <BookmarkCard
+        item={item}
+        isSelectMode={isSelectMode}
+        isSelected={isSelected}
         onPress={() => {
           if (isSelectMode) {
             toggleSelect(item.bookmarkId);
@@ -106,35 +185,10 @@ const FolderListScreen = ({ route, navigation }: any) => {
           if (!isSelectMode) enterSelectMode();
           toggleSelect(item.bookmarkId);
         }}
-      >
-        {item.imageUrl ? (
-          <Image source={{ uri: item.imageUrl }} style={styles.thumbnail} />
-        ) : (
-          <View style={[styles.thumbnail, styles.emptyThumbnail]} />
-        )}
-
-        <View style={styles.overlay}>
-          <Text style={styles.cardTitle} numberOfLines={1}>
-            {item.url}
-          </Text>
-          <Text style={styles.cardSummary} numberOfLines={3}>
-            {item.aiSummary}
-          </Text>
-        </View>
-
-        {isSelectMode && (
-          <View
-            style={[
-              styles.checkCircle,
-              isSelected && styles.checkCircleSelected,
-            ]}
-          >
-            {isSelected && <Text style={styles.checkMark}>✓</Text>}
-          </View>
-        )}
-      </TouchableOpacity>
+      />
     );
   };
+  // -------------------------------------------------------------
 
   return (
     <View style={styles.container}>
@@ -166,7 +220,6 @@ const FolderListScreen = ({ route, navigation }: any) => {
               style={styles.actionButton}
               onPress={e => {
                 if (selectedIds.size === 0) return;
-                // 💡 버튼을 누른 Y좌표를 측정해서 팝업을 바로 밑에 띄웁니다.
                 setContextMenuPos(e.nativeEvent.pageY);
                 setIsContextMenuVisible(true);
               }}
@@ -219,7 +272,6 @@ const FolderListScreen = ({ route, navigation }: any) => {
         )}
       </View>
 
-      {/* 💡 [추가] ••• 컨텍스트 메뉴 (iOS 스타일 드롭다운) */}
       <Modal
         visible={isContextMenuVisible}
         transparent
@@ -230,17 +282,12 @@ const FolderListScreen = ({ route, navigation }: any) => {
           onPress={() => setIsContextMenuVisible(false)}
         >
           <View style={styles.contextModalOverlay}>
-            <View
-              style={[
-                styles.contextMenu,
-                { top: contextMenuPos }, // 계산된 Y 좌표 적용
-              ]}
-            >
+            <View style={[styles.contextMenu, { top: contextMenuPos }]}>
               <TouchableOpacity
                 style={styles.contextMenuBtn}
                 onPress={() => {
                   setIsContextMenuVisible(false);
-                  setIsMoveModalVisible(true); // 이동 모달 띄우기
+                  setIsMoveModalVisible(true);
                 }}
               >
                 <Text style={styles.contextMenuText}>이동</Text>
@@ -250,7 +297,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
                 style={styles.contextMenuBtn}
                 onPress={() => {
                   setIsContextMenuVisible(false);
-                  handleDelete(); // 삭제 확인 알림 띄우기
+                  handleDelete();
                 }}
               >
                 <Text style={[styles.contextMenuText, { color: '#FF3B30' }]}>
@@ -262,7 +309,6 @@ const FolderListScreen = ({ route, navigation }: any) => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* 기존 폴더 이동 바텀 모달 유지 */}
       <Modal
         visible={isMoveModalVisible}
         transparent
@@ -306,13 +352,8 @@ const FolderListScreen = ({ route, navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  headerSafeArea: {
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  headerSafeArea: { backgroundColor: '#FFFFFF' },
   header: {
     height: 60,
     flexDirection: 'row',
@@ -333,11 +374,7 @@ const styles = StyleSheet.create({
     height: 24,
     resizeMode: 'contain',
   },
-  backButtonText: {
-    fontSize: 16,
-    color: '#000',
-    fontWeight: '400',
-  },
+  backButtonText: { fontSize: 16, color: '#000', fontWeight: '400' },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -356,15 +393,8 @@ const styles = StyleSheet.create({
     color: '#000',
     letterSpacing: 1,
   },
-  actionIconDisabled: {
-    color: '#C7C7CD',
-  },
-  selectText: {
-    padding: 10,
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#555',
-  },
+  actionIconDisabled: { color: '#C7C7CD' },
+  selectText: { padding: 10, fontSize: 15, fontWeight: '500', color: '#555' },
   selectBar: {
     height: 32,
     justifyContent: 'center',
@@ -373,22 +403,10 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E5EA',
   },
-  selectBarText: {
-    fontSize: 13,
-    color: '#555',
-  },
-  contentWrapper: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  listContainer: {
-    paddingBottom: 100,
-    paddingTop: 10,
-  },
-  row: {
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
+  selectBarText: { fontSize: 13, color: '#555' },
+  contentWrapper: { flex: 1, paddingHorizontal: 20 },
+  listContainer: { paddingBottom: 100, paddingTop: 10 },
+  row: { justifyContent: 'space-between', marginBottom: 15 },
   card: {
     width: CARD_WIDTH,
     height: CARD_WIDTH - 20,
@@ -396,19 +414,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#E0E0E0',
   },
-  cardSelected: {
-    opacity: 0.75,
-    borderWidth: 3,
-    borderColor: '#FFB899',
-  },
-  thumbnail: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
-  },
-  emptyThumbnail: {
-    backgroundColor: '#D1D1D6',
-  },
+  cardSelected: { opacity: 0.75, borderWidth: 3, borderColor: '#FFB899' },
+  thumbnail: { width: '100%', height: '100%', position: 'absolute' },
+  emptyThumbnail: { backgroundColor: '#D1D1D6' },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(50, 65, 100, 0.45)',
@@ -421,11 +429,25 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 4,
   },
-  cardSummary: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    lineHeight: 16,
+  cardSummary: { fontSize: 12, color: '#FFFFFF', lineHeight: 16 },
+
+  // --- [추가] 하트 버튼 및 이미지 스타일 ---
+  heartButton: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    zIndex: 10,
+    width: 20, // 이미지 버튼 전체 크기
+    height: 22, // 이미지 버튼 전체 크기
+    justifyContent: 'center',
+    alignItems: 'center',
   },
+  heartImage: {
+    width: '100%',
+    height: '100%',
+  },
+  // ------------------------------------------
+
   checkCircle: {
     position: 'absolute',
     bottom: 10,
@@ -439,24 +461,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  checkCircleSelected: {
-    backgroundColor: '#FFB899',
-    borderColor: '#FFB899',
-  },
-  checkMark: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  emptyContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999999',
-  },
+  checkCircleSelected: { backgroundColor: '#FFB899', borderColor: '#FFB899' },
+  checkMark: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
+  emptyContent: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#999999' },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -478,20 +486,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E5EA',
   },
-  modalCancelText: {
-    fontSize: 16,
-    color: '#FFB899',
-    width: 40,
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#000',
-  },
-  folderList: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
+  modalCancelText: { fontSize: 16, color: '#FFB899', width: 40 },
+  modalTitle: { fontSize: 17, fontWeight: '600', color: '#000' },
+  folderList: { paddingHorizontal: 16, paddingTop: 8 },
   folderItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -506,34 +503,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 12,
   },
-  folderIconText: {
-    fontSize: 18,
-  },
-  folderItemText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#000',
-  },
-  folderArrow: {
-    fontSize: 20,
-    color: '#C7C7CD',
-  },
+  folderIconText: { fontSize: 18 },
+  folderItemText: { flex: 1, fontSize: 16, color: '#000' },
+  folderArrow: { fontSize: 20, color: '#C7C7CD' },
   separator: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#E5E5EA',
     marginLeft: 60,
   },
-
-  // 🎨 추가된 드롭다운 팝업 메뉴 스타일
-  contextModalOverlay: {
-    flex: 1,
-    backgroundColor: 'transparent',
-  },
+  contextModalOverlay: { flex: 1, backgroundColor: 'transparent' },
   contextMenu: {
     position: 'absolute',
-    right: 16, // 화면 우측 여백에 딱 맞춤
-    width: 160, // 메뉴 너비
-    backgroundColor: 'rgba(250, 250, 250, 0.98)', // 살짝 불투명한 아이폰 스타일 화이트
+    right: 16,
+    width: 160,
+    backgroundColor: 'rgba(250, 250, 250, 0.98)',
     borderRadius: 14,
     paddingVertical: 4,
     shadowColor: '#000',
@@ -548,11 +531,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'flex-start',
   },
-  contextMenuText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: '400',
-  },
+  contextMenuText: { color: '#000000', fontSize: 16, fontWeight: '400' },
   contextMenuDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: 'rgba(0,0,0,0.1)',

@@ -1,8 +1,9 @@
 import React from 'react';
+import { Image } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// 1. 새로 만든 모든 화면 파일을 불러옵니다 (경로와 파일명 확인 필수!)
+// 1. 화면 파일 불러오기
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
@@ -23,19 +24,55 @@ const MainTabNavigator = () => {
   return (
     <Tab.Navigator
       initialRouteName="홈"
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFD3C0',
+          backgroundColor: 'rgb(255, 249, 249)',
           height: 70,
           paddingBottom: 10,
         },
-        tabBarActiveBackgroundColor: '#FFB899',
+        tabBarActiveBackgroundColor: '#rgba(255, 211, 192, 0.41)',
         tabBarActiveTintColor: '#000',
         tabBarInactiveTintColor: '#666',
-      }}
+
+        // 💡 단일 이미지만 불러오도록 간소화된 tabBarIcon
+        tabBarIcon: () => {
+          let iconSource;
+
+          // 실제 가지고 계신 에셋 폴더의 파일명으로 수정해 주세요!
+          switch (route.name) {
+            case '북마크 추천':
+              iconSource = require('../assets/icon_recommend.png');
+              break;
+            case '검색':
+              iconSource = require('../assets/icon_search.png');
+              break;
+            case '홈':
+              iconSource = require('../assets/icon_home.png');
+              break;
+            case '폴더':
+              iconSource = require('../assets/icon_folder.png');
+              break;
+            case '설정':
+              iconSource = require('../assets/icon_setting.png');
+              break;
+            default:
+              iconSource = require('../assets/icon_recommend.png');
+          }
+
+          return (
+            <Image
+              source={iconSource}
+              style={{
+                width: 24, // 필요에 따라 크기 조절
+                height: 24,
+                resizeMode: 'contain',
+              }}
+            />
+          );
+        },
+      })}
     >
-      {/* 각 탭별 파일명 연결하기 */}
       <Tab.Screen name="북마크 추천" component={RecommendScreen} />
       <Tab.Screen name="검색" component={SearchScreen} />
       <Tab.Screen name="홈" component={HomeScreen} />
