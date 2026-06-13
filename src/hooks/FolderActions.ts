@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { getFolders, createFolder, updateFolder, deleteFolder } from '../services/folderApi';
 
 export interface Folder {
-  folderId: number;
+  id: string;
   name: string;
-  higherFolderId: number | null;
+  higherFolderId: string | null;
   createdAt: string;
 }
 
@@ -17,8 +17,8 @@ export const FolderActions = () => {
 
   useEffect(() => {
     getFolders()
-      .then(data => setFolders(data))
-      .catch(err => console.error('폴더 불러오기 실패:', err));
+      .then((data: Folder[]) => setFolders(data ?? []))
+      .catch((err: any) => console.error('폴더 불러오기 실패:', err));
   }, []);
 
   const openModal = () => {
@@ -30,25 +30,25 @@ export const FolderActions = () => {
   const handleAddFolder = () => {
     if (!folderNameInput.trim()) return;
     createFolder(folderNameInput.trim())
-      .then(newFolder => setFolders(prev => [...prev, newFolder]))
-      .catch(err => console.error('폴더 생성 실패:', err));
+      .then((newFolder: Folder) => setFolders(prev => [...prev, newFolder]))
+      .catch((err: any) => console.error('폴더 생성 실패:', err));
     closeModal();
   };
 
-  const handleDeleteFolder = (folderId: number) => {
-    deleteFolder(folderId)
-      .then(() => setFolders(prev => prev.filter(f => f.folderId !== folderId)))
-      .catch(err => console.error('폴더 삭제 실패:', err));
+  const handleDeleteFolder = (id: string) => {
+    deleteFolder(id)
+      .then(() => setFolders(prev => prev.filter(f => f.id !== id)))
+      .catch((err: any) => console.error('폴더 삭제 실패:', err));
   };
 
-  const handleUpdateFolder = (folderId: number, name: string) => {
-    updateFolder(folderId, name)
-      .then(updated =>
+  const handleUpdateFolder = (id: string, name: string) => {
+    updateFolder(id, name)
+      .then((updated: Folder) =>
         setFolders(prev =>
-          prev.map(f => (f.folderId === folderId ? updated : f)),
+          prev.map(f => (f.id === id ? updated : f)),
         ),
       )
-      .catch(err => console.error('폴더 수정 실패:', err));
+      .catch((err: any) => console.error('폴더 수정 실패:', err));
   };
 
   return {

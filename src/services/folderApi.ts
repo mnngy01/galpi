@@ -1,9 +1,9 @@
 const BASE_URL = 'https://galpibe-production.up.railway.app';
 
 export interface Folder {
-  folderId: number;
+  id: string;
   name: string;
-  higherFolderId: number | null;
+  higherFolderId: string | null;
   createdAt: string;
 }
 
@@ -14,7 +14,8 @@ export const getFolders = async (): Promise<Folder[]> => {
     headers: { 'Content-Type': 'application/json' },
   });
   if (!response.ok) throw new Error('폴더 목록 조회 실패');
-  return response.json();
+  const json = await response.json();
+  return json.data ?? [];
 };
 
 // 폴더 등록
@@ -25,23 +26,25 @@ export const createFolder = async (name: string): Promise<Folder> => {
     body: JSON.stringify({ name }),
   });
   if (!response.ok) throw new Error('폴더 등록 실패');
-  return response.json();
+  const json = await response.json();
+  return json.data;
 };
 
 // 폴더 수정
-export const updateFolder = async (folderId: number, name: string): Promise<Folder> => {
-  const response = await fetch(`${BASE_URL}/folders/${folderId}`, {
+export const updateFolder = async (id: string, name: string): Promise<Folder> => {
+  const response = await fetch(`${BASE_URL}/folders/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
   });
   if (!response.ok) throw new Error('폴더 수정 실패');
-  return response.json();
+  const json = await response.json();
+  return json.data;
 };
 
 // 폴더 삭제
-export const deleteFolder = async (folderId: number): Promise<void> => {
-  const response = await fetch(`${BASE_URL}/folders/${folderId}`, {
+export const deleteFolder = async (id: string): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/folders/${id}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });

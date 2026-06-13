@@ -118,7 +118,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
     .catch((err: any) => console.error('북마크 불러오기 실패:', err));
 
   getFolders()
-    .then((data: Folder[]) => setMovableFolders(data.filter(f => f.folderId !== folderId)))
+    .then((data: Folder[]) => setMovableFolders(data.filter(f => f.id !== folderId)))
     .catch((err: any) => console.error('폴더 불러오기 실패:', err));
 }, [folderId]);
 
@@ -156,7 +156,7 @@ const FolderListScreen = ({ route, navigation }: any) => {
     ]);
   };
 
-  const handleMove = (targetFolderId: number) => {
+  const handleMove = (targetFolderId: string) => {
     setBookmarks(prev => prev.filter(b => !selectedIds.has(b.id)));
     setIsMoveModalVisible(false);
     exitSelectMode();
@@ -325,13 +325,13 @@ const FolderListScreen = ({ route, navigation }: any) => {
 
             <FlatList
               data={movableFolders}
-              keyExtractor={item => item.folderId.toString()}
+              keyExtractor={item => item.id.toString()}
               style={styles.folderList}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.folderItem}
                   activeOpacity={0.7}
-                  onPress={() => handleMove(item.folderId)}
+                  onPress={() => handleMove(item.id)}
                 >
                   <View style={styles.folderIcon}>
                     <Text style={styles.folderIconText}>📁</Text>

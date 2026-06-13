@@ -91,17 +91,18 @@ const FolderScreen = ({ navigation }: any) => {
   const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
   const [editNameInput, setEditNameInput] = useState('');
 
-  const [folderBookmarks, setFolderBookmarks] = useState<Record<number, Bookmark[]>>({});
+  const [folderBookmarks, setFolderBookmarks] = useState<Record<string, Bookmark[]>>({});
 
   useEffect(() => {
-    folders.forEach(folder => {
-      fetchBookmarksByFolder(folder.folderId)
-        .then((data: Bookmark[]) => {
-          setFolderBookmarks(prev => ({ ...prev, [folder.folderId]: data }));
-        })
-        .catch((err: any) => console.error('북마크 불러오기 실패:', err));
-    });
-  }, [folders]);
+  if (!folders || folders.length === 0) return;
+  folders.forEach(folder => {
+    fetchBookmarksByFolder(folder.id)
+      .then((data: Bookmark[]) => {
+        setFolderBookmarks(prev => ({ ...prev, [folder.id]: data }));
+      })
+      .catch((err: any) => console.error('북마크 불러오기 실패:', err));
+  });
+}, [folders]);
 
   const handleLongPressCard = (
     item: Folder,
@@ -129,7 +130,7 @@ const FolderScreen = ({ navigation }: any) => {
     if (!editNameInput.trim() || !activeFolder) return;
     setFolders((prev: Folder[]) =>
       prev.map(f =>
-        f.folderId === activeFolder.folderId
+        f.id === activeFolder.id
           ? { ...f, name: editNameInput.trim() }
           : f,
       ),
@@ -139,7 +140,7 @@ const FolderScreen = ({ navigation }: any) => {
   };
 
   const renderFolderItem: ListRenderItem<Folder> = ({ item }) => {
-  const categoryBookmarks = folderBookmarks[item.folderId] || [];
+  const categoryBookmarks = folderBookmarks[item.id] || [];
   const latestThumbnail = categoryBookmarks[categoryBookmarks.length - 1]?.imageUrl;
 
   return (
@@ -150,7 +151,7 @@ const FolderScreen = ({ navigation }: any) => {
       onLongPress={handleLongPressCard}
       onPress={() => {
         navigation.navigate('BookmarkList', {
-          folderId: item.folderId,
+          folderId: item.id,
           folderName: item.name,
         });
       }}
@@ -173,7 +174,7 @@ const FolderScreen = ({ navigation }: any) => {
       <FlatList
         data={folders || []}
         renderItem={renderFolderItem}
-        keyExtractor={item => item.folderId.toString()}
+        keyExtractor={item => item.id?.toString() ?? ''}
         numColumns={2}
         columnWrapperStyle={styles.row}
         showsVerticalScrollIndicator={false}
@@ -212,7 +213,7 @@ const FolderScreen = ({ navigation }: any) => {
                 <TouchableOpacity
                   style={styles.contextMenuBtn}
                   onPress={() => {
-                    handleDeleteFolder(activeFolder.folderId);
+                    handleDeleteFolder(activeFolder.id);
                     setActiveFolder(null);
                   }}
                 >

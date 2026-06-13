@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dimensions,
   Image,
@@ -13,14 +13,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BOOKMARK_DATA } from '../data/dummyData';
-
 // const BASE_URL = 'http://10.0.2.2:8000';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Bookmark {
-  bookmarkId: number;
+  id: number;
   url: string;
   folderId: number;
   imageUrl: string | null;
@@ -59,7 +57,7 @@ const RecentCard = ({ item }: { item: Bookmark }) => {
   const toggleLike = () => {
     setIsLiked(!isLiked);
     console.log(
-      `${item.bookmarkId}번 북마크 하트 클릭됨. 현재 상태: ${
+      `${item.id}번 북마크 하트 클릭됨. 현재 상태: ${
         !isLiked ? '1 (Like)' : '0 (Unlike)'
       }`,
     );
@@ -68,7 +66,7 @@ const RecentCard = ({ item }: { item: Bookmark }) => {
   return (
     <TouchableOpacity
       style={styles.recentCard}
-      onPress={() => console.log(`${item.bookmarkId} 클릭됨`)}
+      onPress={() => console.log(`${item.id} 클릭됨`)}
       activeOpacity={0.9}
     >
       {item.imageUrl ? (
@@ -103,38 +101,29 @@ const RecentCard = ({ item }: { item: Bookmark }) => {
 
 // ─── 메인 스크린 ───
 const RecommendScreen = () => {
-  // ── 더미 데이터: 추천 3개, 최근 저장 전체 ──
   const insets = useSafeAreaInsets();
-  const recommendList = BOOKMARK_DATA.slice(0, 3);
-  const recentList = BOOKMARK_DATA;
+  const [recommendList, setRecommendList] = useState<Bookmark[]>([]);
+  const [recentList, setRecentList] = useState<Bookmark[]>([]);
 
-  // ── API 연결 시 아래 주석 해제 ──
-  // const [recommendList, setRecommendList] = useState<Bookmark[]>([]);
-  // const [recentList, setRecentList] = useState<Bookmark[]>([]);
-  // const [loading, setLoading] = useState(true);
-  //
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const [recommendRes, recentRes] = await Promise.all([
-  //         fetch(`${BASE_URL}/bookmarks/recommend`),
-  //         fetch(`${BASE_URL}/bookmarks/remind`),
-  //       ]);
-  //       const recommendJson = await recommendRes.json();
-  //       const recentJson = await recentRes.json();
-  //       setRecommendList(recommendJson.data ?? []);
-  //       setRecentList(recentJson.data ?? []);
-  //     } catch (e) {
-  //       console.error('API 요청 실패:', e);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [recommendRes, recentRes] = await Promise.all([
+          fetch('https://galpibe-production.up.railway.app/bookmarks/recommend'),
+          fetch('https://galpibe-production.up.railway.app/bookmarks/remind'),
+        ]);
+        const recommendJson = await recommendRes.json();
+        const recentJson = await recentRes.json();
+        setRecommendList(recommendJson.data ?? []);
+        setRecentList(recentJson.data ?? []);
+      } catch (e) {
+        console.error('API 요청 실패:', e);
+      }
+    };
+    fetchData();
+  }, []);
 
   const icon = require('../assets/icon_galpi.png');
-
   return (
     <SafeAreaView style={styles.container} edges={[]}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -153,7 +142,7 @@ const RecommendScreen = () => {
             contentContainerStyle={styles.horizontalList}
           >
             {recommendList.map(item => (
-              <RecommendCard key={item.bookmarkId} item={item} />
+              <RecommendCard key={item.id} item={item} />
             ))}
           </ScrollView>
         </View>
@@ -164,7 +153,7 @@ const RecommendScreen = () => {
           <Text style={styles.sectionTitle}>최근에 저장했어요.</Text>
           <View style={styles.recentList}>
             {recentList.map(item => (
-              <RecentCard key={item.bookmarkId} item={item} />
+              <RecentCard key={item.id} item={item} />
             ))}
           </View>
         </View>

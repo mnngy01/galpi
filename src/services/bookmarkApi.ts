@@ -18,10 +18,10 @@ export const fetchBookmarks = async (): Promise<Bookmark[]> => {
 };
 
 // GET /folders/{folderId}/bookmarks - 북마크 목록 조회 (폴더별)
-export const fetchBookmarksByFolder = async (folderId: number): Promise<Bookmark[]> => {
+export const fetchBookmarksByFolder = async (folderId: string): Promise<Bookmark[]> => {
   const response = await fetch(`${BASE_URL}/folders/${folderId}/bookmarks`);
   const json = await response.json();
-  return json.data;
+  return json.data ?? [];
 };
 
 // POST /bookmarks - 북마크 등록
