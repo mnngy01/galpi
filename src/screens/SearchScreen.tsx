@@ -9,48 +9,33 @@ import {
   Image,
   Dimensions,
   ListRenderItem,
-  Linking, // 원문 이동을 위한 Linking 유지
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
-// 상단 외부 데이터 파일에서 DUMMY_URLS 명확히 import 완료
-import { BOOKMARK_DATA } from '../data/dummyData';
-
-// 북마크 아이템의 타입 인터페이스 정의
-interface BookmarkItem {
-  bookmarkId: number;
-  url: string;
-  folderId: number;
-  imageUrl: string;
-  aiSummary: string;
-  like: boolean;
-  createdAt: string;
-}
+import { searchBookmarks, Bookmark } from '../services/bookmarkApi';
 
 const SearchScreen = () => {
-  const [query, setQuery] = useState(''); // 입력창의 실시간 값
-  const [searchQuery, setSearchQuery] = useState(''); // 엔터를 눌러 확정된 검색어
-  const [filteredResults, setFilteredResults] = useState<BookmarkItem[]>([]);
+  const [query, setQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredResults, setFilteredResults] = useState<Bookmark[]>([]);
 
-  // 검색 실행 함수 (키보드 엔터를 칠 때만 작동)
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setSearchQuery(query);
     if (!query.trim()) {
       setFilteredResults([]);
       return;
     }
-
-    // 제목(title) 또는 내용(summary)에 검색어가 포함되었는지 필터링
-    const filtered = (BOOKMARK_DATA as BookmarkItem[]).filter(
-      item =>
-        item.url.toLowerCase().includes(query.toLowerCase()) ||
-        item.aiSummary.toLowerCase().includes(query.toLowerCase()),
-    );
-    setFilteredResults(filtered);
+    try {
+      const results = await searchBookmarks(query);
+      setFilteredResults(results ?? []);
+    } catch (err) {
+      console.error('검색 실패:', err);
+      setFilteredResults([]);
+    }
   };
 
-  // 1열 전용 가로형 카드 렌더링 함수 (자네의 UI 디자인 가이드 완전 반영)
-  const renderCardItem: ListRenderItem<BookmarkItem> = ({ item }) => {
+  const renderCardItem: ListRenderItem<Bookmark> = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.card}
@@ -69,20 +54,18 @@ const SearchScreen = () => {
           <View style={[styles.thumbnail, styles.emptyThumbnail]} />
         )}
 
-        {/* 30% 불투명도의 검은색 배경 오버레이 레이어 */}
         <View style={styles.overlay}>
           <Text style={styles.cardTitle} numberOfLines={1}>
             {getSourceName(item.url)}
           </Text>
           <Text style={styles.cardSummary} numberOfLines={2}>
-            {item.aiSummary}
+            {item.aiSummary ?? ''}
           </Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  // Hook 렌더 에러 방지를 위한 조건부 컴포넌트 헬퍼 함수
   const renderContent = () => {
     if (!searchQuery) {
       return <Text style={styles.emptyText}>검색 화면</Text>;
@@ -100,8 +83,8 @@ const SearchScreen = () => {
       <FlatList
         data={filteredResults}
         renderItem={renderCardItem}
-        keyExtractor={item => item.bookmarkId.toString()}
-        numColumns={1} // 👈 1열 구조로 명확히 고정!
+        keyExtractor={item => item.id.toString()}
+        numColumns={1}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
       />
@@ -110,14 +93,12 @@ const SearchScreen = () => {
 
   return (
     <View style={styles.container}>
-      {/* 상단 노치 영역 마진 확보 */}
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
           <Text style={styles.logoText}>GALPI</Text>
         </View>
       </SafeAreaView>
 
-      {/* 검색 바 */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -130,7 +111,6 @@ const SearchScreen = () => {
         />
       </View>
 
-      {/* 결과 콘텐츠 출력 영역 */}
       <View style={styles.content}>{renderContent()}</View>
     </View>
   );
@@ -172,22 +152,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 40,
   },
-
-  // 1열 전용 배치 스타일 리스트
   listContainer: {
-    paddingHorizontal: 25, // 검색창 패딩(marginHorizontal: 25)과 좌우 정렬을 완벽히 매칭
+    paddingHorizontal: 25,
     paddingTop: 12,
-    paddingBottom: 100, // 하단 탭바에 카드가 잘리는 현상 방지 여백
+    paddingBottom: 100,
   },
-
-  // 1열 전용 카드 디자인 (가로폭 100%)
   card: {
     width: '100%',
-    height: 110, // 세로로 나열될 때 가장 황금 배율인 컴팩트한 높이 지정
+    height: 110,
     borderRadius: 18,
     overflow: 'hidden',
     backgroundColor: '#E0E0E0',
-    marginBottom: 14, // 카드와 카드 사이의 수직 간격 조절
+    marginBottom: 14,
   },
   thumbnail: {
     width: '100%',
@@ -200,14 +176,14 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     padding: 16,
-    justifyContent: 'flex-end', // 텍스트들을 카드의 하단/좌측에 안정감 있게 정렬
-    backgroundColor: 'rgba(0, 0, 0, 0.3)', // 30% 불투명도의 검은색 배경 오버레이 무드 처리
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#FFFFFF',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)', // 텍스트 가독성 확보용 그림자
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
     marginBottom: 4,
