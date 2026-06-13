@@ -75,82 +75,83 @@ export const BOOKMARK_DATA = [
   {
     bookmarkId: 1,
     url: 'https://youtu.be/my_7f-tY1tA?si=ISjPwKC1laH4LGrE',
-    folderId: 1, // 여행
+    folderId: 1,
     imageUrl: 'data:image/jpeg;base64,...',
-    aiSummary: '파리 주요 관광지를 3일 동안 효율적으로 여행하는 일정 소개',
+    aiSummary:
+      '수박 당도 표기 브릭스(Brix)의 방법 안내\n키워드: 수박, 당도, 브릭스, 과일, 맛, 선별, 비파괴 측정, 구매, 품질, 식감',
     like: true,
-    createdAt: new Date('2026-05-10T14:32:00'),
+    createdAt: '2026-05-10T14:32:00.000Z', // new Date() → string
   },
   {
     bookmarkId: 2,
     url: 'https://www.instagram.com/p/food456',
-    folderId: 2, // 맛집
+    folderId: 2,
     imageUrl: 'https://search.pstatic.net/common/?src=...',
     aiSummary: '서울에서 인기 있는 브런치 카페와 메뉴 소개',
     like: false,
-    createdAt: new Date('2026-05-10T15:10:00'),
+    createdAt: '2026-05-10T15:10:00.000Z',
   },
   {
     bookmarkId: 3,
     url: 'https://blog.naver.com/study789',
-    folderId: 3, // 학업
+    folderId: 3,
     imageUrl: 'https://search.pstatic.net/sunny/?src=...',
     aiSummary: '효율적인 전공 공부 방법과 추천 자료 정리',
     like: false,
-    createdAt: new Date('2026-05-09T20:21:00'),
+    createdAt: '2026-05-09T20:21:00.000Z',
   },
   {
     bookmarkId: 4,
     url: 'https://news.example.com/economy123',
-    folderId: 4, // 경제
+    folderId: 4,
     imageUrl: 'https://search.pstatic.net/common/?src=...',
     aiSummary: '글로벌 경제 흐름과 투자 방향에 대한 전문가 분석',
     like: true,
-    createdAt: new Date('2026-05-08T09:45:00'),
+    createdAt: '2026-05-08T09:45:00.000Z',
   },
   {
     bookmarkId: 5,
     url: 'https://www.youtube.com/watch?v=recipe321',
-    folderId: 5, // 요리
+    folderId: 5,
     imageUrl: 'https://img.youtube.com/vi/recipe321/0.jpg',
     aiSummary: '간단한 재료로 빠르게 만들 수 있는 요리 레시피 소개',
     like: false,
-    createdAt: new Date('2026-05-07T18:12:00'),
+    createdAt: '2026-05-07T18:12:00.000Z',
   },
   {
     bookmarkId: 6,
     url: 'https://shopping.example.com/item999',
-    folderId: 6, // 쇼핑
+    folderId: 6,
     imageUrl: 'https://via.placeholder.com/150',
     aiSummary: '대학생을 위한 가격 대비 성능 좋은 노트북 추천',
     like: true,
-    createdAt: new Date('2026-05-06T13:55:00'),
+    createdAt: '2026-05-06T13:55:00.000Z',
   },
   {
     bookmarkId: 7,
     url: 'https://medium.com/dev-story',
-    folderId: 7, // 개발
+    folderId: 7,
     imageUrl: 'https://search.pstatic.net/common/?src=...',
     aiSummary: '초보자를 위한 React Native 개발 환경 설정과 기본 개념 설명',
     like: false,
-    createdAt: new Date('2026-05-05T11:30:00'),
+    createdAt: '2026-05-05T11:30:00.000Z',
   },
   {
     bookmarkId: 8,
     url: 'https://www.youtube.com/watch?v=fitness777',
-    folderId: 8, // 운동
+    folderId: 8,
     imageUrl: 'https://i.ytimg.com/vi/iyW4f5pONq0/hqdefault.jpg',
     aiSummary: '집에서 쉽게 따라 할 수 있는 전신 운동 루틴',
     like: false,
-    createdAt: new Date('2026-05-04T07:20:00'),
+    createdAt: '2026-05-04T07:20:00.000Z',
   },
   {
     bookmarkId: 9,
     url: 'https://travelblog.com/japan-trip',
-    folderId: 1, // 여행
+    folderId: 1,
     imageUrl: 'https://i.ytimg.com/vi/sJgNGkfYsH0/hqdefault.jpg',
     aiSummary: '도쿄 여행 시 꼭 가봐야 할 명소와 꿀팁 정리',
     like: true,
-    createdAt: new Date('2026-05-03T22:10:00'),
+    createdAt: '2026-05-03T22:10:00.000Z',
   },
 ];
