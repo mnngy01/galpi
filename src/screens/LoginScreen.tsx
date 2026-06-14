@@ -41,10 +41,8 @@ const LoginScreen = ({ navigation }: any) => {
         return;
       }
 
-      if (json.data?.isFirstLogin) {
+      if (response.ok) {
         navigation.replace('InterestSelect');
-      } else {
-        navigation.replace('MainHome');
       }
     } catch (err) {
       Alert.alert('로그인 실패', 'ID 또는 PW를 확인해 주세요.');

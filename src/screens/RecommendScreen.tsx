@@ -12,20 +12,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-// const BASE_URL = 'http://10.0.2.2:8000';
+import {
+  fetchRecommendedBookmarks,
+  fetchRemindBookmarks,
+  Bookmark,
+} from '../services/bookmarkApi';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-
-interface Bookmark {
-  id: number;
-  url: string;
-  folderId: number;
-  imageUrl: string | null;
-  aiSummary: string | null;
-  like: boolean;
-  createdAt: string;
-}
 
 // ─── 추천 카드 ───
 const RecommendCard = ({ item }: { item: Bookmark }) => (
@@ -108,14 +101,12 @@ const RecommendScreen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [recommendRes, recentRes] = await Promise.all([
-          fetch('https://galpibe-production.up.railway.app/bookmarks/recommend'),
-          fetch('https://galpibe-production.up.railway.app/bookmarks/remind'),
+        const [recommendData, recentData] = await Promise.all([
+          fetchRecommendedBookmarks(),
+          fetchRemindBookmarks(),
         ]);
-        const recommendJson = await recommendRes.json();
-        const recentJson = await recentRes.json();
-        setRecommendList(recommendJson.data ?? []);
-        setRecentList(recentJson.data ?? []);
+        setRecommendList(recommendData ?? []);
+        setRecentList(recentData ?? []);
       } catch (e) {
         console.error('API 요청 실패:', e);
       }
@@ -141,9 +132,15 @@ const RecommendScreen = () => {
             pagingEnabled
             contentContainerStyle={styles.horizontalList}
           >
-            {recommendList.map(item => (
-              <RecommendCard key={item.id} item={item} />
-            ))}
+            {recommendList.length === 0 ? (
+              <Text style={styles.emptyText}>
+                저장된 북마크가 쌓이면 추천 갈피가 생겨요.
+              </Text>
+            ) : (
+              recommendList.map(item => (
+                <RecommendCard key={item.id} item={item} />
+              ))
+            )}
           </ScrollView>
         </View>
 
@@ -296,6 +293,13 @@ const styles = StyleSheet.create({
   heartImage: {
     width: '100%',
     height: '100%',
+  },
+  emptyText: {
+    color: 'rgba(0,0,0,0.4)',
+    fontSize: 14,
+    lineHeight: 22,
+    paddingHorizontal: 28,
+    paddingVertical: 8,
   },
 });
 
