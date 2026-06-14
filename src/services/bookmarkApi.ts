@@ -34,6 +34,7 @@ export const addBookmark = async (url: string): Promise<Bookmark> => {
     body: JSON.stringify({ url }),
   });
   const json = await response.json();
+  console.log('addBookmark 응답:', JSON.stringify(json));
   return json.data;
 };
 
