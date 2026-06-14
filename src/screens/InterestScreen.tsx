@@ -8,23 +8,26 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserStore } from '../store/userStore';
+import { postInterests } from '../services/memberApi';
 
 const INTERESTS = [
-  { id: 'architecture', icon: '🏛️', label: '건축' },
+  { id: 'tea', icon: '🍵', label: '차(tea)' },
   { id: 'outdoor', icon: '⛺', label: '아웃도어' },
-  { id: 'workspace', icon: '💼', label: '워크스페이스' },
-  { id: 'drink', icon: '🍹', label: '술' },
-  { id: 'pet', icon: '🐶', label: '반려' },
-  { id: 'tea', icon: '🍵', label: '차' },
   { id: 'kids', icon: '🧒', label: '아이와 함께' },
-  { id: 'travel', icon: '✈️', label: '해외 여행' },
+  { id: 'pet', icon: '🐶', label: '반려' },
+  { id: 'architecture', icon: '🏛️', label: '건축' },
+  { id: 'travel', icon: '✈️', label: '해외여행' },
+  { id: 'restaurant', icon: '🍽️', label: '맛집' },
+  { id: 'interior', icon: '🛋️', label: '인테리어' },
 ] as const;
 
 type InterestId = (typeof INTERESTS)[number]['id'];
 
 const InterestScreen = ({ navigation }: any) => {
   const [selected, setSelected] = useState<Set<InterestId>>(new Set());
-  const setSelectedFolders = useUserStore((state: any) => state.setSelectedFolders);
+  const setSelectedFolders = useUserStore(
+    (state: any) => state.setSelectedFolders,
+  );
   void setSelectedFolders;
 
   const toggle = (id: InterestId) => {
@@ -35,8 +38,18 @@ const InterestScreen = ({ navigation }: any) => {
     });
   };
 
-  const handleSubmit = () => {
-    navigation.replace('MainHome');
+  const handleSubmit = async () => {
+    const selectedLabels = INTERESTS.filter(item => selected.has(item.id)).map(
+      item => item.label,
+    );
+
+    try {
+      await postInterests(selectedLabels);
+      navigation.replace('MainHome');
+    } catch (err) {
+      console.error('관심사 등록 실패:', err);
+      navigation.replace('MainHome'); // 실패해도 메인으로
+    }
   };
 
   return (
