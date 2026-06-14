@@ -1,6 +1,7 @@
 package com.project3
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -15,20 +16,28 @@ class MainActivity : ReactActivity() {
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    handleShareIntent(intent)
     super.onCreate(savedInstanceState)
-    if (intent?.action == Intent.ACTION_SEND && intent?.type == "text/plain") {
-      SharedUrlHolder.url = intent.getStringExtra(Intent.EXTRA_TEXT)
-    }
   }
 
   override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
-    if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
-      SharedUrlHolder.url = intent.getStringExtra(Intent.EXTRA_TEXT)
+    intent?.let { handleShareIntent(it) }
+  }
+
+  private fun handleShareIntent(intent: Intent) {
+  if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+    val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return
+    val encoded = Uri.encode(sharedText)
+    println("공유 데이터 들어옴: $sharedText")
+
+
+    val newIntent = Intent(Intent.ACTION_VIEW).apply {
+      data = Uri.parse("galpi://share?url=$encoded")
+      flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
+
+    startActivity(newIntent)
   }
 }
-
-object SharedUrlHolder {
-  var url: String? = null
 }

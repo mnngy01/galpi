@@ -12,8 +12,6 @@ class ShareModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun getSharedUrl(promise: Promise) {
-    val url = SharedUrlHolder.url
-    SharedUrlHolder.url = null
-    promise.resolve(url)
+    promise.resolve(null)
   }
 }

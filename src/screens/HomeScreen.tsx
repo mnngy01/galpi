@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -7,7 +9,7 @@ import {
   FlatList,
   Image,
   Dimensions,
-  Linking, 
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
@@ -91,6 +93,14 @@ const HomeScreen = ({ navigation }: any) => {
       .then(data => setBookmarks(data))
       .catch(err => console.error('북마크 불러오기 실패:', err));
   }, []);
+  // 오류나면 삭제
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookmarks()
+        .then(data => setBookmarks(data))
+        .catch(err => console.error('북마크 불러오기 실패:', err));
+    }, []),
+  );
 
   const renderBookmarkItem = ({ item }: { item: Bookmark }) => {
     return <BookmarkCard item={item} />;
@@ -141,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-    logo: {
+  logo: {
     width: 100,
     height: 40,
   },
