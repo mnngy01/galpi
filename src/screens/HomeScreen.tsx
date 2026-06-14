@@ -100,7 +100,11 @@ const HomeScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
-          <Text style={styles.logoText}>GALPI</Text>
+          <Image
+            source={require('../assets/logo_pink_2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
       </SafeAreaView>
 
@@ -137,11 +141,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: '300',
-    letterSpacing: 2,
-    color: '#000',
+    logo: {
+    width: 100,
+    height: 40,
   },
   contentWrapper: { flex: 1, paddingHorizontal: 20 },
   listContainer: { paddingBottom: 100 },

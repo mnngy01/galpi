@@ -51,8 +51,9 @@ const SettingScreen = ({ navigation }: any) => {
       >
         <View style={styles.profileSection}>
           <Image
-            source={require('../assets/logo_pink_2.png')} // 원하는 기본 이미지 경로로 교체
+            source={require('../assets/profile.png')}
             style={styles.profileImage}
+            resizeMode="cover"
           />
 
           <View style={styles.profileInfo}>
@@ -111,11 +112,11 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 60,
-    backgroundColor: '#D9D9D9',
-  },
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: '#D9D9D9',
+    },
   profileImagePlaceholder: {
     width: 100,
     height: 100,

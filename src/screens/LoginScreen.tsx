@@ -11,8 +11,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const BASE_URL = 'https://galpibe-production.up.railway.app';
 
 const LoginScreen = ({ navigation }: any) => {
   const [loginId, setLoginId] = useState('');
@@ -25,16 +28,23 @@ const LoginScreen = ({ navigation }: any) => {
     }
 
     try {
-      console.log('로그인 시도:', { loginId, loginPw });
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId, loginPw }),
+      });
 
-      // 백엔드 부분
+      const json = await response.json();
 
-      const result = await fakeLogin(loginId, loginPw); // 프론트용 임시 로그인 함수
+      if (!response.ok) {
+        Alert.alert('로그인 실패', 'ID 또는 PW를 확인해 주세요.');
+        return;
+      }
 
-      if (result.isFirstLogin) {
-        navigation.replace('InterestSelect'); // 첫 로그인 → 관심사 선택
+      if (json.data?.isFirstLogin) {
+        navigation.replace('InterestSelect');
       } else {
-        navigation.replace('MainHome'); // 기존 유저 → 메인
+        navigation.replace('MainHome');
       }
     } catch (err) {
       Alert.alert('로그인 실패', 'ID 또는 PW를 확인해 주세요.');
@@ -49,12 +59,14 @@ const LoginScreen = ({ navigation }: any) => {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.inner}>
-            {/* 상단 타이틀 */}
             <View style={styles.headerContainer}>
-              <Text style={styles.headerTitle}>GALPI</Text>
+              <Image
+                source={require('../assets/logo_pink_2.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
             </View>
 
-            {/* 입력 영역 */}
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
@@ -74,7 +86,6 @@ const LoginScreen = ({ navigation }: any) => {
               />
             </View>
 
-            {/* 로그인 버튼 */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.loginButton}
@@ -90,14 +101,6 @@ const LoginScreen = ({ navigation }: any) => {
   );
 };
 
-// 임시 로그인 함수 — 파이썬 백엔드 연동 전까지 사용
-// isFirstLogin: true  → 관심사 선택 화면으로
-// isFirstLogin: false → MainHome으로
-async function fakeLogin(id: string, pw: string) {
-  await new Promise<void>(res => setTimeout(() => res(), 300));
-  return { isFirstLogin: true, userId: 'user-123' };
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -112,11 +115,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 80,
   },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: '300',
-    letterSpacing: 2,
-    color: '#000',
+  logo: {
+    width: 150,
+    height: 60,
   },
   inputContainer: {
     marginBottom: 100,

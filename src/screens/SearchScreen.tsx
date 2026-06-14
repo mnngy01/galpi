@@ -68,7 +68,7 @@ const SearchScreen = () => {
 
   const renderContent = () => {
     if (!searchQuery) {
-      return <Text style={styles.emptyText}>검색 화면</Text>;
+      return <Text style={styles.emptyText}> </Text>;
     }
 
     if (filteredResults.length === 0) {
@@ -95,7 +95,11 @@ const SearchScreen = () => {
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
-          <Text style={styles.logoText}>GALPI</Text>
+          <Image
+            source={require('../assets/logo_pink_2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
       </SafeAreaView>
 
@@ -124,11 +128,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoText: {
-    fontSize: 24,
-    fontWeight: '300',
-    letterSpacing: 2,
-    color: '#000',
+    logo: {
+    width: 100,
+    height: 40,
   },
   searchContainer: {
     marginHorizontal: 25,

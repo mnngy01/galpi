@@ -167,7 +167,11 @@ const FolderScreen = ({ navigation }: any) => {
       <SafeAreaView edges={['top']} style={styles.headerSafeArea}>
         <View style={styles.header}>
           <View style={styles.headerBtn} />
-          <Text style={styles.logoText}>GALPI</Text>
+          <Image
+            source={require('../assets/logo_pink_2.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
           <TouchableOpacity style={styles.headerBtn} onPress={openModal}>
             <Text style={styles.moreIcon}>＋</Text>
           </TouchableOpacity>
@@ -372,12 +376,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   moreIcon: { fontSize: 22, fontWeight: '400', color: '#000' },
-  logoText: {
-    fontSize: 24,
-    fontWeight: '300',
-    letterSpacing: 2,
-    color: '#000',
-  },
+  logo: {
+      width: 90,
+      height: 40,
+    },
   listContainer: { paddingHorizontal: 16, paddingTop: 12, paddingBottom: 100 },
   row: { justifyContent: 'space-between', marginBottom: 16 },
   card: {
