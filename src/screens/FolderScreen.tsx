@@ -1,5 +1,6 @@
 //FolderScreen.tsx
 import React, { useState, useRef, useEffect } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import {
   StyleSheet,
@@ -87,6 +88,7 @@ const FolderScreen = ({ navigation }: any) => {
     handleAddFolder,
     handleDeleteFolder,
   } = FolderActions();
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // 폴더 별 북마크 개수, 사진 로드 위해
 
   const [activeFolder, setActiveFolder] = useState<Folder | null>(null);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
@@ -97,16 +99,31 @@ const FolderScreen = ({ navigation }: any) => {
     Record<string, Bookmark[]>
   >({});
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, []),
+  );
+
+  // folders + trigger 둘 다 준비됐을 때 fetch
   useEffect(() => {
     if (!folders || folders.length === 0) return;
-    folders.forEach(folder => {
-      fetchBookmarksByFolder(folder.id)
-        .then((data: Bookmark[]) => {
-          setFolderBookmarks(prev => ({ ...prev, [folder.id]: data }));
-        })
-        .catch((err: any) => console.error('북마크 불러오기 실패:', err));
-    });
-  }, [folders]);
+    const loadAllBookmarks = async () => {
+      const results = await Promise.all(
+        folders.map(folder =>
+          fetchBookmarksByFolder(folder.id)
+            .then(data => ({ id: folder.id, data }))
+            .catch(() => ({ id: folder.id, data: [] as Bookmark[] })),
+        ),
+      );
+      const map: Record<string, Bookmark[]> = {};
+      results.forEach(({ id, data }) => {
+        map[id] = data;
+      });
+      setFolderBookmarks(map);
+    };
+    loadAllBookmarks();
+  }, [folders, refreshTrigger]);
 
   const handleLongPressCard = (
     item: Folder,
