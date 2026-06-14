@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { signUp } from '../services/memberApi';
 
 type SignupFormData = {
   name: string;
@@ -87,7 +88,7 @@ const SignupScreen = ({ navigation }: any) => {
     Alert.alert('비밀번호 확인', '비밀번호가 일치합니다.');
   };
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     const birthYear = formData.birthYear.trim();
     const birthMonth = formData.birthMonth.trim().padStart(2, '0');
     const birthDay = formData.birthDay.trim().padStart(2, '0');
@@ -128,8 +129,13 @@ const SignupScreen = ({ navigation }: any) => {
       phone: formData.phone.trim(),
     };
 
-    console.log('회원가입 요청 데이터:', signupData);
-    navigation.navigate('Login');
+    try {
+      await signUp(signupData);
+      navigation.navigate('Login');
+    } catch (err) {
+      console.error('회원가입 실패:', err);
+      Alert.alert('회원가입 실패', '다시 시도해 주세요.');
+    }
   };
 
   return (

@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   Dimensions,
+  Linking, 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getSourceName } from '../utils/getSourceName';
@@ -39,7 +40,13 @@ const BookmarkCard = ({ item }: { item: Bookmark }) => {
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => console.log(`${item.id} 클릭됨`)}
+      onPress={() => {
+        if (item.url) {
+          Linking.openURL(item.url).catch(err =>
+            console.error('링크를 열 수 없습니다:', err),
+          );
+        }
+      }}
       activeOpacity={0.9} // 터치 시 너무 투명해지는 것 방지
     >
       {item.imageUrl ? (
